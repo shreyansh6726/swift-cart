@@ -4,17 +4,29 @@ import API from '../api';
 const AddProduct = () => {
   const [images, setImages] = useState([]);
   const [productData, setProductData] = useState({
-    name: '', price: '', category: '', description: '', productId: ''
+    name: '', 
+    price: '', 
+    category: '', 
+    description: '', 
+    productId: ''
   });
 
+  // Handle text input changes (This uses setProductData)
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProductData({
+      ...productData,
+      [name]: value
+    });
+  };
+
   const handleFileChange = (e) => {
-    setImages(e.target.files); // Store the actual file objects
+    setImages(e.target.files); 
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Create FormData for Multi-part upload
     const formData = new FormData();
     formData.append('name', productData.name);
     formData.append('price', productData.price);
@@ -22,7 +34,6 @@ const AddProduct = () => {
     formData.append('description', productData.description);
     formData.append('productId', productData.productId);
 
-    // Append multiple files
     for (let i = 0; i < images.length; i++) {
       formData.append('images', images[i]);
     }
@@ -34,19 +45,70 @@ const AddProduct = () => {
       alert('Product Added Successfully!');
     } catch (err) {
       console.error(err);
+      alert('Error adding product');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      {/* ... text inputs ... */}
-      <input type="file" multiple onChange={handleFileChange} />
-      <button type="submit">Upload Product</button>
-    </form>
+    <div style={{ padding: '20px' }}>
+      <h2>Add New Product</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <input 
+            type="text" 
+            name="productId" 
+            placeholder="Product ID" 
+            value={productData.productId} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        <div>
+          <input 
+            type="text" 
+            name="name" 
+            placeholder="Product Name" 
+            value={productData.name} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        <div>
+          <input 
+            type="number" 
+            name="price" 
+            placeholder="Price" 
+            value={productData.price} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        <div>
+          <input 
+            type="text" 
+            name="category" 
+            placeholder="Category" 
+            value={productData.category} 
+            onChange={handleChange} 
+            required 
+          />
+        </div>
+        <div>
+          <textarea 
+            name="description" 
+            placeholder="Description" 
+            value={productData.description} 
+            onChange={handleChange} 
+          />
+        </div>
+        <div>
+          <label>Upload Images: </label>
+          <input type="file" multiple onChange={handleFileChange} required />
+        </div>
+        <button type="submit" style={{ marginTop: '10px' }}>Upload Product</button>
+      </form>
+    </div>
   );
 };
 
-// ... all your component logic ...
-
-// MAKE SURE THIS LINE IS AT THE VERY BOTTOM
 export default AddProduct;

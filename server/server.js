@@ -1,32 +1,33 @@
-require('dotenv').config(); // Load environment variables first
+require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // Added for handling file paths
 const connectDB = require('./config/db');
 
-// Initialize the Express application
 const app = express();
 
-// 1. Database Connection
-// This connects to the MongoDB string provided in your .env
+// 1. Middleware
+app.use(cors()); 
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true }));
+
+// 2. Static Folder for Uploads
+// This allows your React frontend to view the images you upload
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// 3. Database Connection
 connectDB();
 
-// 2. Middleware
-app.use(cors()); // Enables cross-origin requests from your React frontend
-app.use(express.json()); // Parses incoming JSON payloads
-app.use(express.urlencoded({ extended: true })); // Parses URL-encoded data (form submissions)
-
-// 3. API Routes
-// Mapping specific endpoints to their respective route files
+// 4. API Routes
 app.use('/api/customers', require('./routes/customerRoutes'));
 app.use('/api/retailers', require('./routes/retailerRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 
-// 4. Base/Health Check Route
 app.get('/', (req, res) => {
   res.send('ByteDesk E-commerce API is live and running 🚀');
 });
 
-// 5. Global Error Handling (Optional but recommended)
+// 5. Global Error Handling
 app.use((err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode).json({
@@ -35,7 +36,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 6. Server Listener
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server confirmed running on port ${PORT}`);

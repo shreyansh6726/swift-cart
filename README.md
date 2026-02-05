@@ -13,7 +13,7 @@ A React-based frontend application for managing product catalogs, featuring mult
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/shreyansh6726/swift-cart.git
     cd frontend
     ```
 
@@ -46,8 +46,6 @@ Builds the app for production to the `build` folder.
 ## Common Build Issues
 
 If the build fails with `[eslint] no-unused-vars`, ensure that all state setters (like `setProductData`) are properly utilized in your functions. In CI environments, warnings are treated as fatal errors to ensure code quality.
-
----
 
 ## Contributing
 1. Fork the project.

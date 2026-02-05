@@ -13,7 +13,7 @@ A React-based frontend application for managing product catalogs, featuring mult
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/shreyansh6726/swift-cart.git
     cd frontend
     ```
 

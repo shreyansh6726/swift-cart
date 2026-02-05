@@ -22,6 +22,7 @@ const retailerSchema = new mongoose.Schema({
     ref: 'Product'
   }],
   isVerified: { type: Boolean, default: false }
-}, { timestamps: true });
+}, 
+{ timestamps: true });
 
 module.exports = mongoose.model('Retailer', retailerSchema);

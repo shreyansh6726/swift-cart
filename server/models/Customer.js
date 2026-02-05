@@ -14,8 +14,10 @@ const customerSchema = new mongoose.Schema({
   // Restricted to 'm', 'f', or 'o'
   gender: { 
     type: String, 
-    required: true, 
-    enum: ['m', 'f', 'o'] 
+    required: true,
+    lowercase: true,
+    trim: true,
+    enum: ['male', 'female', 'other'] 
   },
   email: { 
     type: String, 

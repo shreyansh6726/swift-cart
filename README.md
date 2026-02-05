@@ -47,8 +47,6 @@ Builds the app for production to the `build` folder.
 
 If the build fails with `[eslint] no-unused-vars`, ensure that all state setters (like `setProductData`) are properly utilized in your functions. In CI environments, warnings are treated as fatal errors to ensure code quality.
 
----
-
 ## Contributing
 1. Fork the project.
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).

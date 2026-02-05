@@ -4,7 +4,13 @@ const retailerSchema = new mongoose.Schema({
   shopName: { type: String, required: true },
   ownerName: { type: String, required: true },
   age: { type: Number, required: true },
-  gender: { type: String, required: true, enum: ['m', 'f', 'o'] },
+  gender: { 
+    type: String, 
+    required: true, 
+    lowercase: true, 
+    trim: true,
+    enum: ['male', 'female', 'other'] 
+  },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   phone: { type: String, required: true },

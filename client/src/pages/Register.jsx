@@ -29,7 +29,7 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    const endpoint = isRetailer ? '/retailers/register' : '/customers/register';
+    const endpoint = isRetailer ? 'retailers/register' : 'customers/register';
     
     // Ensure numeric fields are numbers before sending
     const payload = {

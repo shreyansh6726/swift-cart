@@ -16,7 +16,8 @@ const retailerSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   address: { type: String, required: true },
   retailerId: { type: String, unique: true, required: true },
-  // Link to the Products collection
+  role: { type: String, default: 'retailer' },
+
   itemsSold: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product'

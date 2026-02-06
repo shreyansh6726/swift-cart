@@ -17,7 +17,7 @@ const Login = () => {
     setError('');
 
     // Determine which endpoint to hit based on the toggle
-    const endpoint = isRetailer ? 'retailers/login' : 'customers/login';
+    const endpoint = isRetailer ? 'api/retailers/login' : 'api/customers/login';
 
     try {
       const { data } = await API.post(endpoint, { email, password });

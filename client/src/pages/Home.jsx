@@ -48,7 +48,7 @@ const Home = () => {
               <img src={product.images[0]} alt={product.name} className="product-image" />
               <div className="product-info">
                 <h3>{product.name}</h3>
-                <p className="price">${product.price}</p>
+                <p className="price">Rs. {product.price}</p>
                 <button className="view-btn">View Details</button>
               </div>
             </div>

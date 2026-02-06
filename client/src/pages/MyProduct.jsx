@@ -75,7 +75,7 @@ const MyProducts = () => {
           <div key={product._id} style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '8px' }}>
             <img src={product.images[0]} alt={product.name} style={{ width: '100%', height: '150px', objectFit: 'cover' }} />
             <h3>{product.name}</h3>
-            <p>${product.price} | {product.category}</p>
+            <p>Rs. {product.price} | {product.category}</p>
           </div>
         ))}
       </div>

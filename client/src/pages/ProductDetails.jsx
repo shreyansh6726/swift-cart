@@ -52,7 +52,7 @@ const ProductDetails = () => {
           <h1>{product.name}</h1>
           <p className="product-id">Product ID: {product.productId}</p>
           <p className="description">{product.description}</p>
-          <h2 className="price">${product.price}</h2>
+          <h2 className="price">Rs. {product.price}</h2>
           
           <div className="actions">
             <button className="add-to-cart-btn">Add to Cart</button>

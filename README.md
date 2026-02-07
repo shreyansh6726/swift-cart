@@ -1,55 +1,63 @@
-# Product Management Frontend
+# Swift-Cart: Multi-Vendor System
+A robust MERN stack application featuring role-based access control (RBAC), secure image uploads, and persistent authentication.
 
-A React-based frontend application for managing product catalogs, featuring multi-part image uploads and optimized production builds.
+## Key Features Implemented
+Dual Authentication System: Separate login flows for Customers and Retailers.
 
-##  Features
+Role-Based Access Control (RBAC): Custom middleware to restrict sensitive actions (like adding products) to Retailer accounts only.
 
-* **Product Creation:** Add products with metadata (ID, Name, Price, Category, Description).
-* **Multi-Image Upload:** Supports selecting and uploading multiple files via `multipart/form-data`.
-* **API Integration:** Pre-configured Axios instance for backend communication.
-* **Form Validation:** Controlled components with state management.
+Secure Product Management: Full CRUD capability with Mongoose validation.
 
-##  Installation
+Cloudinary Integration: Multi-image upload handling using multer and multer-storage-cloudinary.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/shreyansh6726/swift-cart.git
-    cd frontend
-    ```
+Persistent Login: State management via React Context API and LocalStorage to keep users logged in across sessions.
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+### Backend Architecture (Node.js & MongoDB)
+The backend follows an MVC (Model-View-Controller) pattern for scalability.
 
-3.  **Environment Setup:**
-    Create a `.env` file in the root directory and add your backend URL:
-    ```env
-    REACT_APP_API_URL=http://localhost:5000/api
-    ```
+1. Data Models (/models)
+User Models: Separate schemas for Customer and Retailer.
 
-## Available Scripts
+Product Model: Stores product details, an array of Cloudinary image URLs, and a soldBy reference linked to the Retailer ID.
 
-### `npm start`
-Runs the app in development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+2. Security Middleware (/middleware)
+protect: Decodes the JWT from the Authorization header, identifies the user type, and attaches the user object to req.user.retailerOnly: Guards routes to ensure only users with the retailer role can proceed.
 
-### `npm run build`
-Builds the app for production to the `build` folder.  
-*Note: Our CI pipeline treats ESLint warnings as errors. Ensure all variables are used before deploying.*
+3. Image Upload Pipeline (/config)
+Uses Multer to parse multipart/form-data and stream images directly to Cloudinary, returning secure URLs to be saved in MongoDB.
 
-## Project Structure
+### Frontend Implementation (React)
+1. API Configuration (/api/index.js)
+A centralized Axios instance configured with a baseURL and an interceptor that automatically attaches the JWT token to every outgoing request.
 
-* `src/pages/AddProduct.js`: The main form component for adding new products.
-* `src/api.js`: Axios configuration for API requests.
-* `src/App.js`: Main routing and application entry point.
+2. Authentication Context (/context)
+Uses the Context API to provide a global user state. It initializes by checking localStorage, fulfilling your requirement to keep users logged in even after closing the browser.
 
-## Common Build Issues
+3. Add Product Logic
+A complex form utilizing FormData to handle both text fields (Product ID, Name, Price) and binary file data (up to 10 images).
 
-If the build fails with `[eslint] no-unused-vars`, ensure that all state setters (like `setProductData`) are properly utilized in your functions. In CI environments, warnings are treated as fatal errors to ensure code quality.
+## Installation & Setup
+Prerequisites
+1. Node.js & npm
 
-## Contributing
-1. Fork the project.
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4. Push to the Branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+2. MongoDB Atlas Account
+
+3. Cloudinary Account
+
+4. Environment Variables (.env)
+Create a ```.env``` file in the server directory:
+
+Code snippet
+```
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+CLOUDINARY_CLOUD_NAME=your_name
+CLOUDINARY_API_KEY=your_key
+CLOUDINARY_API_SECRET=your_secret
+```
+
+Running the App
+Backend: ```cd server && npm run dev``` (Runs on port 5000)
+
+Frontend: ```cd client && npm start``` (Runs on port 3000)

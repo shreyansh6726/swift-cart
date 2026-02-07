@@ -8,13 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Restore User Session
     const savedUser = localStorage.getItem('userInfo');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
 
-    // 2. Restore Cart Items
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
       setCart(JSON.parse(savedCart));
@@ -30,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    setCart([]); // Clear cart on logout for security
+    setCart([]); 
     localStorage.removeItem('userInfo');
     localStorage.removeItem('cart');
   };

@@ -14,9 +14,9 @@ const Register = () => {
     gender: '',
     phone: '',
     address: '',
-    shopName: '',    // Retailer specific
-    ownerName: '',   // Retailer specific
-    retailerId: '',  // Retailer specific
+    shopName: '',    
+    ownerName: '',   
+    retailerId: '',  
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -31,23 +31,19 @@ const Register = () => {
 
     const endpoint = isRetailer ? 'retailers/register' : 'customers/register';
     
-    // Ensure numeric fields are numbers before sending
     const payload = {
       ...formData,
       age: Number(formData.age),
       retailerId: isRetailer ? Number(formData.retailerId) : undefined,
-      // For Retailers, ownerName is often the same as the user's name if not specified
       ownerName: isRetailer ? (formData.ownerName || formData.name) : undefined 
     };
 
     try {
       const res = await API.post(endpoint, payload);
-      // Log in immediately and store state as per your requirement
       login(res.data); 
       alert('Registration successful!');
       navigate('/');
     } catch (err) {
-      // Show the specific validation error from the backend
       setError(err.response?.data?.message || 'Registration failed');
     }
   };
@@ -64,7 +60,7 @@ const Register = () => {
 
         {error && <p style={{ color: 'red', fontSize: '12px' }}>{error}</p>}
 
-        {/* Common Fields */}
+        {}
         <input name="name" placeholder="Full Name" onChange={handleChange} required style={styles.input} />
         <input name="email" type="email" placeholder="Email" onChange={handleChange} required style={styles.input} />
         <input name="password" type="password" placeholder="Password" onChange={handleChange} required style={styles.input} />
@@ -82,7 +78,7 @@ const Register = () => {
         <input name="phone" placeholder="Phone Number" onChange={handleChange} required style={styles.input} />
         <input name="address" placeholder="Residential Address" onChange={handleChange} required style={styles.input} />
 
-        {/* Conditional Fields for Retailer */}
+        {}
         {isRetailer && (
           <>
             <hr />

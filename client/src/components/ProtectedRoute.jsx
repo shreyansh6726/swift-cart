@@ -5,14 +5,14 @@ import { AuthContext } from '../context/AuthContext';
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { user, loading } = useContext(AuthContext);
 
-  if (loading) return <div>Loading...</div>; // Prevent flickering while checking localStorage
+  if (loading) return <div>Loading...</div>; 
 
   if (!user) {
     return <Navigate to="/login" />;
   }
 
   if (allowedRole && user.role !== allowedRole) {
-    return <Navigate to="/" />; // Redirect to home if they don't have permission
+    return <Navigate to="/" />; 
   }
 
   return children;

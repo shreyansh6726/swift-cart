@@ -14,7 +14,7 @@ const ProductDetails = () => {
       try {
         const { data } = await API.get(`/products/${id}`);
         setProduct(data);
-        setMainImage(data.images[0]); // Set the first image as default
+        setMainImage(data.images[0]); 
         setLoading(false);
       } catch (error) {
         console.error("Error fetching product details:", error);
@@ -30,7 +30,7 @@ const ProductDetails = () => {
   return (
     <div className="details-container">
       <div className="details-grid">
-        {/* Left Side: Image Gallery */}
+        {}
         <div className="image-section">
           <img src={mainImage} alt={product.name} className="main-view" />
           <div className="thumbnail-list">
@@ -46,7 +46,7 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Right Side: Product Info */}
+        {}
         <div className="info-section">
           <span className="category-tag">{product.category}</span>
           <h1>{product.name}</h1>

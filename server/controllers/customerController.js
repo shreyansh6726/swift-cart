@@ -16,7 +16,7 @@ exports.registerCustomer = async (req, res) => {
 
     const customer = await Customer.create({
       name,
-      age: Number(age), // Ensure age is a number
+      age: Number(age), 
       gender,
       email,
       password: hashedPassword,
@@ -39,17 +39,15 @@ exports.registerCustomer = async (req, res) => {
       message: "Registration successful!"
     });
   } catch (error) {
-    // This will now tell you exactly what field failed (e.g., "Path 'phone' is required")
     console.error("Detailed Registration Error:", error);
     res.status(500).json({ 
       message: "Registration failed", 
       error: error.message,
-      details: error.errors // This sends back specific validation errors
+      details: error.errors 
     });
   }
 };
 
-// Login remains the same...
 exports.loginCustomer = async (req, res) => {
   try {
     const { email, password } = req.body;

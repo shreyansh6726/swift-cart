@@ -9,18 +9,17 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// 2. Set up the storage engine
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'ecommerce_products', // This creates a folder in your Cloudinary account
+    folder: 'ecommerce_products', 
     allowed_formats: ['jpg', 'png', 'jpeg'],
   },
 });
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 } 
 });
 
 module.exports = upload;

@@ -11,7 +11,7 @@ const AddProduct = () => {
     price: '', 
     category: '', 
     description: '', 
-    productId: '' // Must match Mongoose schema key exactly
+    productId: '' 
   });
 
   const handleChange = (e) => {
@@ -19,7 +19,6 @@ const AddProduct = () => {
   };
 
   const handleFileChange = (e) => {
-    // Convert FileList to Array for easier handling if needed
     setImages(e.target.files); 
   };
 
@@ -27,7 +26,6 @@ const AddProduct = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Using FormData is required for file uploads
     const formData = new FormData();
     formData.append('productId', productData.productId);
     formData.append('name', productData.name);
@@ -35,15 +33,11 @@ const AddProduct = () => {
     formData.append('category', productData.category);
     formData.append('description', productData.description);
 
-    // Append multiple images
-    // Ensure 'images' matches the field name in your upload.array('images') middleware
     for (let i = 0; i < images.length; i++) {
       formData.append('images', images[i]);
     }
 
     try {
-      // The 'protect' middleware on the server will use the token 
-      // attached by our Axios interceptor to identify the retailer (soldBy).
       await API.post('/products/add', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });

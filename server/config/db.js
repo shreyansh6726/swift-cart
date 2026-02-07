@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   const uri = process.env.MONGO_URI;
 
-  // Safety Check: Catch the 'undefined' error before Mongoose does
   if (!uri) {
     console.error('❌ Database Error: MONGO_URI is undefined.');
     console.error('👉 Check if your .env file exists and contains MONGO_URI=your_connection_string');

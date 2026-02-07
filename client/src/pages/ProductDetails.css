@@ -10,7 +10,6 @@
   gap: 50px;
 }
 
-/* Image Gallery Styles */
 .image-section {
   display: flex;
   flex-direction: column;
@@ -81,7 +80,6 @@
 .add-to-cart-btn { background-color: #ff9f00; color: white; }
 .buy-now-btn { background-color: #fb641b; color: white; }
 
-/* Responsive for Mobile */
 @media (max-width: 768px) {
   .details-grid { grid-template-columns: 1fr; }
 }

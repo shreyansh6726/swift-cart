@@ -23,12 +23,12 @@ const Navbar = () => {
 
         {user ? (
           <>
-            {/* Retailer Specific Links */}
+            {}
             {user.role === 'retailer' && (
               <Link to="/add-product" className="special-link">Add Product</Link>
             )}
 
-            {/* Customer Specific Links */}
+            {}
             {user.role === 'customer' && (
               <Link to="/cart">Cart</Link>
             )}

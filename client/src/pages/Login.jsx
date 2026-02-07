@@ -16,16 +16,13 @@ const Login = () => {
     e.preventDefault();
     setError('');
 
-    // Determine which endpoint to hit based on the toggle
     const endpoint = isRetailer ? '/retailers/login' : '/customers/login';
 
     try {
       const { data } = await API.post(endpoint, { email, password });
       
-      // Save to Context & LocalStorage (handles your persistent login requirement)
       login({ ...data, role: isRetailer ? 'retailer' : 'customer' });
       
-      // Redirect to homepage
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
@@ -37,7 +34,7 @@ const Login = () => {
       <form onSubmit={handleSubmit} style={styles.card}>
         <h2>{isRetailer ? 'Retailer Login' : 'Customer Login'}</h2>
         
-        {/* Role Toggle */}
+        {}
         <div style={styles.toggleContainer}>
           <button 
             type="button" 
@@ -80,7 +77,6 @@ const Login = () => {
   );
 };
 
-// Basic Styling
 const styles = {
   container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f4f4' },
   card: { padding: '2rem', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '350px' },

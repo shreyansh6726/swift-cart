@@ -4,7 +4,7 @@ import './Home.css';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(''); // New search state
+  const [searchTerm, setSearchTerm] = useState(''); 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +21,6 @@ const Home = () => {
     fetchProducts();
   }, []);
 
-  // Filter products based on search term
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())

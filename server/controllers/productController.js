@@ -10,33 +10,33 @@ exports.createProduct = async (req, res) => {
     const { productId, name, description, price, category } = req.body;
 
     if (!productId || !name || !price) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Missing required fields. Received: productId=${productId}, name=${name}` 
+      return res.status(400).json({
+        success: false,
+        message: `Missing required fields. Received: productId=${productId}, name=${name}`
       });
     }
     if (!req.user || !req.user._id) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Session expired or invalid. Please login again." 
+      return res.status(401).json({
+        success: false,
+        message: "Session expired or invalid. Please login again."
       });
     }
 
     const imageUrls = req.files ? req.files.map(file => file.path) : [];
 
     if (imageUrls.length === 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "At least one product image is required." 
+      return res.status(400).json({
+        success: false,
+        message: "At least one product image is required."
       });
     }
 
     const product = new Product({
-      productId: Number(productId), 
+      productId: Number(productId),
       name,
       description,
       images: imageUrls,
-      soldBy: req.user._id, 
+      soldBy: req.user._id,
       price: Number(price),
       category,
     });
@@ -53,22 +53,22 @@ exports.createProduct = async (req, res) => {
     console.error("Mongoose Save Error:", error);
 
     if (error.code === 11000) {
-      return res.status(400).json({ 
-        success: false, 
-        message: `Product ID ${req.body.productId} already exists. Please use a unique SKU.` 
+      return res.status(400).json({
+        success: false,
+        message: `Product ID ${req.body.productId} already exists. Please use a unique SKU.`
       });
     }
 
-    res.status(500).json({ 
-      success: false, 
-      message: error.message || "An internal server error occurred." 
+    res.status(500).json({
+      success: false,
+      message: error.message || "An internal server error occurred."
     });
   }
 };
 
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('soldBy', 'name email storeName');
+    const product = await Product.findById(req.params.id).populate('soldBy', 'shopName ownerName email');
     if (!product) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }

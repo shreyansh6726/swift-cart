@@ -70,12 +70,12 @@ const ProductDetails = () => {
             <div className="retailer-header">Sold By Retailer</div>
             <div className="retailer-info">
               <div className="retailer-avatar">
-                {product.soldBy.name ? product.soldBy.name.charAt(0).toUpperCase() : 'R'}
+                {product.soldBy.shopName ? product.soldBy.shopName.charAt(0).toUpperCase() : 'R'}
               </div>
               <div className="retailer-details">
-                <h4>{product.soldBy.name || product.soldBy.storeName || 'Unknown Retailer'}</h4>
+                <h4>{product.soldBy.shopName || product.soldBy.ownerName || 'Unknown Retailer'}</h4>
                 <p>{product.soldBy.email}</p>
-                {product.soldBy.storeName && <p>{product.soldBy.storeName}</p>}
+                {product.soldBy.ownerName && <p>Owner: {product.soldBy.ownerName}</p>}
               </div>
             </div>
           </div>

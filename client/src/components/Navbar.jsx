@@ -33,7 +33,7 @@ const Navbar = () => {
               <Link to="/cart">Cart</Link>
             )}
 
-            <span className="user-name">Hi, {user.ownerName || user.name}</span>
+            <span className="user-name">Hi, {user.shopName || user.name}</span>
             <button onClick={handleLogout} className="logout-btn">Logout</button>
           </>
         ) : (

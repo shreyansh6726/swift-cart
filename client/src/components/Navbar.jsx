@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import './Navbar.css';
 
-const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+const Navbar = ({ toggleCart }) => {
+  const { user, logout, cart } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -24,16 +24,17 @@ const Navbar = () => {
 
         {user ? (
           <>
-            { }
             {user.role === 'retailer' && (
               <Link to="/add-product" className="special-link">Add Product</Link>
             )}
 
-            { }
             {user.role === 'customer' && (
-              <Link to="/cart">Cart</Link>
+              <button onClick={toggleCart} className="nav-cart-btn">
+                Cart ({cart.length})
+              </button>
             )}
 
+            <Link to="/profile">Profile</Link>
             <span className="user-name">Hi, {user.shopName || user.name}</span>
             <button onClick={handleLogout} className="logout-btn">Logout</button>
           </>

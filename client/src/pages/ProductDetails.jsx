@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api';
+import { AuthContext } from '../context/AuthContext';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart, updateQuantity, cart, user } = useContext(AuthContext);
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,6 +33,26 @@ const ProductDetails = () => {
   if (loading) return <div className="loading-container">Loading details...</div>;
   if (error) return <div className="error-container">{error}</div>;
   if (!product) return <div className="error-container">Product not found</div>;
+
+  // Check if item is in cart
+  const cartItem = cart.find(item => item.productId === product.productId);
+  const quantity = cartItem ? cartItem.quantity : 0;
+
+  const handleAddToCart = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (user.role !== 'customer') {
+      alert("Retailers cannot add items to cart.");
+      return;
+    }
+    addToCart(product.productId, 1);
+  };
+
+  const handleUpdateQuantity = (newQty) => {
+    updateQuantity(product.productId, newQty);
+  };
 
   return (
     <div className="product-details-container">
@@ -64,6 +87,20 @@ const ProductDetails = () => {
 
         <h3 className="details-description-title">Description</h3>
         <p className="details-description">{product.description}</p>
+
+        <div className="action-section">
+          {quantity > 0 ? (
+            <div className="quantity-controls">
+              <button onClick={() => handleUpdateQuantity(quantity - 1)} className="qty-btn">-</button>
+              <span className="qty-value">{quantity}</span>
+              <button onClick={() => handleUpdateQuantity(quantity + 1)} className="qty-btn">+</button>
+            </div>
+          ) : (
+            <button className="add-to-cart-btn" onClick={handleAddToCart}>
+              Add to Cart
+            </button>
+          )}
+        </div>
 
         {product.soldBy && (
           <div className="retailer-card">

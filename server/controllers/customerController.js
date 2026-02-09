@@ -16,18 +16,18 @@ exports.registerCustomer = async (req, res) => {
 
     const customer = await Customer.create({
       name,
-      age: Number(age), 
+      age: Number(age),
       gender,
       email,
       password: hashedPassword,
       phone,
       address,
-      cart: null 
+      cart: null
     });
 
     const token = jwt.sign(
-      { id: customer._id }, 
-      process.env.JWT_SECRET || 'default_secret', 
+      { id: customer._id },
+      process.env.JWT_SECRET || 'default_secret',
       { expiresIn: '30d' }
     );
 
@@ -40,10 +40,10 @@ exports.registerCustomer = async (req, res) => {
     });
   } catch (error) {
     console.error("Detailed Registration Error:", error);
-    res.status(500).json({ 
-      message: "Registration failed", 
+    res.status(500).json({
+      message: "Registration failed",
       error: error.message,
-      details: error.errors 
+      details: error.errors
     });
   }
 };
@@ -58,6 +58,37 @@ exports.loginCustomer = async (req, res) => {
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, age, phone, address } = req.body;
+    const customerId = req.user.id; // From auth middleware
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
+    if (name) customer.name = name;
+    if (age) customer.age = Number(age);
+    if (phone) customer.phone = phone;
+    if (address) customer.address = address;
+
+    const updatedCustomer = await customer.save();
+
+    res.json({
+      _id: updatedCustomer._id,
+      name: updatedCustomer.name,
+      email: updatedCustomer.email,
+      phone: updatedCustomer.phone,
+      address: updatedCustomer.address,
+      age: updatedCustomer.age,
+      message: "Profile updated successfully"
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

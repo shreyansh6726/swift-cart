@@ -20,15 +20,16 @@ const Navbar = () => {
 
       <div className="nav-links">
         <Link to="/">Home</Link>
+        <Link to="/products">Products</Link>
 
         {user ? (
           <>
-            {}
+            { }
             {user.role === 'retailer' && (
               <Link to="/add-product" className="special-link">Add Product</Link>
             )}
 
-            {}
+            { }
             {user.role === 'customer' && (
               <Link to="/cart">Cart</Link>
             )}

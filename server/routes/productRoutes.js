@@ -5,11 +5,11 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const Product = require('../models/Product');
 const { protect, retailerOnly } = require('../middleware/authMiddleware');
-const { createProduct } = require('../controllers/productController');
+const { createProduct, getProductById } = require('../controllers/productController');
 const upload = require('../config/cloudinary');
 
 if (!upload || typeof upload.array !== 'function') {
-    console.error("ERROR: Multer 'upload' is not initialized correctly in productRoutes.js");
+  console.error("ERROR: Multer 'upload' is not initialized correctly in productRoutes.js");
 }
 
 cloudinary.config({
@@ -60,5 +60,6 @@ router.get('/search', async (req, res) => {
   }
 });
 
+router.get('/:id', getProductById);
 router.post('/add', protect, retailerOnly, upload.array('images', 10), createProduct);
 module.exports = router;

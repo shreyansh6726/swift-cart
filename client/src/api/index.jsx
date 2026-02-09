@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_URL, 
+  baseURL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000/api',
 });
 
 API.interceptors.request.use((req) => {
   const userInfo = localStorage.getItem('userInfo');
-  
+
   if (userInfo) {
     try {
       const { token } = JSON.parse(userInfo);

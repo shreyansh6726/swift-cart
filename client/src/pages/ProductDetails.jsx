@@ -1,64 +1,85 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import API from '../api';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
-  const [mainImage, setMainImage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductDetails = async () => {
       try {
-        const { data } = await API.get(`/products/${id}`);
-        setProduct(data);
-        setMainImage(data.images[0]); 
+        const response = await API.get(`/products/${id}`);
+        setProduct(response.data);
         setLoading(false);
-      } catch (error) {
-        console.error("Error fetching product details:", error);
+      } catch (err) {
+        console.error('Error fetching product details:', err);
+        setError('Failed to load product details.');
         setLoading(false);
       }
     };
-    fetchProduct();
+
+    fetchProductDetails();
   }, [id]);
 
-  if (loading) return <div className="loader">Loading Product...</div>;
-  if (!product) return <div className="error">Product not found.</div>;
+  if (loading) return <div className="loading-container">Loading details...</div>;
+  if (error) return <div className="error-container">{error}</div>;
+  if (!product) return <div className="error-container">Product not found</div>;
 
   return (
-    <div className="details-container">
-      <div className="details-grid">
-        {}
-        <div className="image-section">
-          <img src={mainImage} alt={product.name} className="main-view" />
-          <div className="thumbnail-list">
+    <div className="product-details-container">
+      <div className="details-image-section">
+        <button onClick={() => navigate(-1)} className="back-btn">← Back to Products</button>
+        <div className="main-image-container">
+          <img
+            src={product.images && product.images.length > 0 ? product.images[selectedImage] : 'https://via.placeholder.com/500x500?text=No+Image'}
+            alt={product.name}
+            className="main-image"
+          />
+        </div>
+        {product.images && product.images.length > 1 && (
+          <div className="thumbnail-grid">
             {product.images.map((img, index) => (
-              <img 
-                key={index} 
-                src={img} 
-                alt="thumbnail" 
-                className={mainImage === img ? "thumb active" : "thumb"}
-                onClick={() => setMainImage(img)}
+              <img
+                key={index}
+                src={img}
+                alt={`${product.name} ${index + 1}`}
+                className={`thumbnail ${selectedImage === index ? 'active' : ''}`}
+                onClick={() => setSelectedImage(index)}
               />
             ))}
           </div>
-        </div>
+        )}
+      </div>
 
-        {}
-        <div className="info-section">
-          <span className="category-tag">{product.category}</span>
-          <h1>{product.name}</h1>
-          <p className="product-id">Product ID: {product.productId}</p>
-          <p className="description">{product.description}</p>
-          <h2 className="price">Rs. {product.price}</h2>
-          
-          <div className="actions">
-            <button className="add-to-cart-btn">Add to Cart</button>
-            <button className="buy-now-btn">Buy Now</button>
+      <div className="details-info-section">
+        <span className="details-category">{product.category || 'General'}</span>
+        <h1 className="details-title">{product.name}</h1>
+        <div className="details-price">${product.price}</div>
+
+        <h3 className="details-description-title">Description</h3>
+        <p className="details-description">{product.description}</p>
+
+        {product.soldBy && (
+          <div className="retailer-card">
+            <div className="retailer-header">Sold By Retailer</div>
+            <div className="retailer-info">
+              <div className="retailer-avatar">
+                {product.soldBy.name ? product.soldBy.name.charAt(0).toUpperCase() : 'R'}
+              </div>
+              <div className="retailer-details">
+                <h4>{product.soldBy.name || product.soldBy.storeName || 'Unknown Retailer'}</h4>
+                <p>{product.soldBy.email}</p>
+                {product.soldBy.storeName && <p>{product.soldBy.storeName}</p>}
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

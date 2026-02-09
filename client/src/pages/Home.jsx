@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import './Home.css';
 
 const Home = () => {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(''); 
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -31,9 +33,9 @@ const Home = () => {
   return (
     <div className="home-container">
       <div className="search-section">
-        <input 
-          type="text" 
-          placeholder="Search products by name or category..." 
+        <input
+          type="text"
+          placeholder="Search products by name or category..."
           className="search-bar"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -43,7 +45,12 @@ const Home = () => {
       <div className="product-grid">
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
-            <div key={product._id} className="product-card">
+            <div
+              key={product._id}
+              className="product-card"
+              onClick={() => navigate(`/products/${product._id}`)}
+              style={{ cursor: 'pointer' }}
+            >
               <img src={product.images[0]} alt={product.name} className="product-image" />
               <div className="product-info">
                 <h3>{product.name}</h3>

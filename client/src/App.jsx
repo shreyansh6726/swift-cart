@@ -10,6 +10,8 @@ import Register from './pages/Register';
 import AddProduct from './pages/AddProduct';
 import ProductDetails from './pages/ProductDetails';
 
+import ProductList from './pages/ProductList';
+
 const AppRoutes = () => {
   const { user, loading } = useContext(AuthContext);
 
@@ -19,33 +21,34 @@ const AppRoutes = () => {
 
   return (
     <>
-      <Navbar /> {}
+      <Navbar /> { }
       <Routes>
-        {}
+        { }
         <Route path="/" element={<Home />} />
-        <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/products" element={<ProductList />} />
+        <Route path="/products/:id" element={<ProductDetails />} />
 
-        {}
-        <Route 
-          path="/login" 
-          element={user ? <Navigate to="/" /> : <Login />} 
+        { }
+        <Route
+          path="/login"
+          element={user ? <Navigate to="/" /> : <Login />}
         />
-        <Route 
-          path="/register" 
-          element={user ? <Navigate to="/" /> : <Register />} 
+        <Route
+          path="/register"
+          element={user ? <Navigate to="/" /> : <Register />}
         />
 
-        {}
-        <Route 
-          path="/add-product" 
+        { }
+        <Route
+          path="/add-product"
           element={
             <ProtectedRoute allowedRole="retailer">
               <AddProduct />
             </ProtectedRoute>
-          } 
+          }
         />
 
-        {}
+        { }
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </>

@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   // Fetch Cart Helper
   const fetchCart = async () => {
     try {
-      const { data } = await API.get('/cart');
+      const { data } = await API.get('/customers/cart');
       setCart(data.cart);
       setCartTotal(data.cartTotal);
     } catch (error) {
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         // Fetch cart if user is customer
         if (parsedUser.role === 'customer') {
           try {
-            const { data } = await API.get('/cart');
+            const { data } = await API.get('/customers/cart');
             setCart(data.cart);
             setCartTotal(data.cartTotal);
           } catch (err) {
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
 
   const addToCart = async (productId, quantity = 1) => {
     try {
-      const { data } = await API.post('/cart/add', { productId, quantity });
+      const { data } = await API.post('/customers/cart/add', { productId, quantity });
       setCart(data.cart);
       setCartTotal(data.cartTotal);
       // alert("Cart updated!"); // Optional: Remove alert for better UX with quantity controls
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
   const removeFromCart = async (productId) => {
     try {
-      const { data } = await API.post('/cart/remove', { productId });
+      const { data } = await API.post('/customers/cart/remove', { productId });
       setCart(data.cart);
       setCartTotal(data.cartTotal);
     } catch (error) {
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateQuantity = async (productId, quantity) => {
     try {
-      const { data } = await API.post('/cart/update-quantity', { productId, quantity });
+      const { data } = await API.post('/customers/cart/update-quantity', { productId, quantity });
       setCart(data.cart);
       setCartTotal(data.cartTotal);
     } catch (error) {

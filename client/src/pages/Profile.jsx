@@ -41,7 +41,8 @@ const Profile = () => {
         setError('');
 
         try {
-            const { data } = await API.put('/profile', formData);
+            const endpoint = user.role === 'retailer' ? '/retailers/profile' : '/customers/profile';
+            const { data } = await API.put(endpoint, formData);
             login(data, localStorage.getItem('token')); // Update context with new data
             setMessage('Profile updated successfully!');
         } catch (err) {

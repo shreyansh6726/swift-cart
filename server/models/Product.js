@@ -15,12 +15,10 @@ const productSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  // Array of strings to store Cloudinary URLs (Max 10 images)
   images: {
     type: [String],
     validate: [arrayLimit, '{PATH} exceeds the limit of 10 images']
   },
-  // Reference back to the Retailer
   soldBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Retailer',
@@ -30,7 +28,6 @@ const productSchema = new mongoose.Schema({
   category: String
 }, { timestamps: true });
 
-// Validation function for the image array
 function arrayLimit(val) {
   return val.length <= 10;
 }

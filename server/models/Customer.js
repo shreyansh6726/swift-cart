@@ -5,13 +5,11 @@ const customerSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  // Added immediately after name
   age: { 
     type: Number, 
     required: true,
-    min: 13 // Common e-commerce age restriction
+    min: 13 
   },
-  // Restricted to 'm', 'f', or 'o'
   gender: { 
     type: String, 
     required: true,
@@ -37,7 +35,6 @@ const customerSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  // Initialized as null per your requirement
   cart: { 
     type: [Number], 
     default: null 

@@ -14,9 +14,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 connectDB();
 
-app.use('/api/customers', require('./routes/customerRoutes'));
-app.use('/api/retailers', require('./routes/retailerRoutes'));
-app.use('/api/products', require('./routes/productRoutes'));
+app.use('/customers', require('./routes/customerRoutes'));
+app.use('/retailers', require('./routes/retailerRoutes'));
+app.use('/products', require('./routes/productRoutes'));
 
 app.get('/', (req, res) => {
   res.send('ByteDesk E-commerce API is live and running 🚀');

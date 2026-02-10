@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext, getAuthToken } from '../context/AuthContext';
 import API from '../api';
 import './Profile.css';
 
@@ -43,7 +43,7 @@ const Profile = () => {
         try {
             const endpoint = user.role === 'retailer' ? '/retailers/profile' : '/customers/profile';
             const { data } = await API.put(endpoint, formData);
-            login(data, localStorage.getItem('token')); // Update context with new data
+            login(data, getAuthToken(), undefined); // Update context, keep same storage (session vs persistent)
             setMessage('Profile updated successfully!');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update profile');

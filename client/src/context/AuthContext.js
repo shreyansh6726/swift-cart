@@ -1,13 +1,47 @@
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useRef } from 'react';
 import API from '../api';
 
 export const AuthContext = createContext();
+
+// Helper: get auth from whichever storage has it (persistent first, then session)
+const getStoredAuth = () => {
+  const fromLocal = localStorage.getItem('userInfo') && localStorage.getItem('token');
+  if (fromLocal) {
+    try {
+      return {
+        user: JSON.parse(localStorage.getItem('userInfo')),
+        token: localStorage.getItem('token'),
+        storage: localStorage,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+  const fromSession = sessionStorage.getItem('userInfo') && sessionStorage.getItem('token');
+  if (fromSession) {
+    try {
+      return {
+        user: JSON.parse(sessionStorage.getItem('userInfo')),
+        token: sessionStorage.getItem('token'),
+        storage: sessionStorage,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+};
+
+export const getAuthToken = () => {
+  return localStorage.getItem('token') || sessionStorage.getItem('token');
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [cart, setCart] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const storageRef = useRef(null); // current storage (localStorage or sessionStorage)
 
   // Fetch Cart Helper
   const fetchCart = async () => {
@@ -22,14 +56,11 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const savedUser = localStorage.getItem('userInfo');
-      const token = localStorage.getItem('token'); // Assuming token is stored separately or part of userInfo
-
-      if (savedUser && token) {
-        const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
-        // Fetch cart if user is customer
-        if (parsedUser.role === 'customer') {
+      const stored = getStoredAuth();
+      if (stored) {
+        storageRef.current = stored.storage;
+        setUser(stored.user);
+        if (stored.user.role === 'customer') {
           try {
             const { data } = await API.get('/customers/cart');
             setCart(data.cart);
@@ -44,10 +75,18 @@ export const AuthProvider = ({ children }) => {
     checkUser();
   }, []);
 
-  const login = (userData, token) => {
+  // keepLoggedIn: true = localStorage (persistent), false = sessionStorage (session only). undefined = keep current storage (e.g. profile update).
+  const login = (userData, token, keepLoggedIn = true) => {
     setUser(userData);
-    localStorage.setItem('userInfo', JSON.stringify(userData));
-    if (token) localStorage.setItem('token', token); // Store token if passed
+    const storage =
+      keepLoggedIn === undefined
+        ? (storageRef.current || localStorage)
+        : keepLoggedIn
+          ? localStorage
+          : sessionStorage;
+    storageRef.current = storage;
+    storage.setItem('userInfo', JSON.stringify(userData));
+    if (token) storage.setItem('token', token);
 
     if (userData.role === 'customer') {
       fetchCart();
@@ -60,6 +99,9 @@ export const AuthProvider = ({ children }) => {
     setCartTotal(0);
     localStorage.removeItem('userInfo');
     localStorage.removeItem('token');
+    sessionStorage.removeItem('userInfo');
+    sessionStorage.removeItem('token');
+    storageRef.current = null;
   };
 
   const addToCart = async (productId, quantity = 1) => {

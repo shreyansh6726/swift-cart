@@ -7,6 +7,7 @@ const Login = () => {
   const [isRetailer, setIsRetailer] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [keepLoggedIn, setKeepLoggedIn] = useState(true);
   const [error, setError] = useState('');
   
   const { login } = useContext(AuthContext);
@@ -20,9 +21,8 @@ const Login = () => {
 
     try {
       const { data } = await API.post(endpoint, { email, password });
-      
-      login({ ...data, role: isRetailer ? 'retailer' : 'customer' });
-      
+      const userData = { ...data, role: isRetailer ? 'retailer' : 'customer' };
+      login(userData, data.token, keepLoggedIn);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
@@ -71,6 +71,16 @@ const Login = () => {
           style={styles.input}
         />
 
+        <label style={styles.checkboxLabel}>
+          <input
+            type="checkbox"
+            checked={keepLoggedIn}
+            onChange={(e) => setKeepLoggedIn(e.target.checked)}
+            style={styles.checkbox}
+          />
+          Keep me logged in
+        </label>
+
         <button type="submit" style={styles.submitBtn}>Login</button>
       </form>
     </div>
@@ -84,6 +94,8 @@ const styles = {
   activeTab: { flex: 1, padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none', cursor: 'pointer' },
   inactiveTab: { flex: 1, padding: '10px', backgroundColor: '#fff', color: '#000', border: 'none', cursor: 'pointer' },
   input: { width: '100%', padding: '10px', margin: '10px 0', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' },
+  checkboxLabel: { display: 'flex', alignItems: 'center', gap: '8px', margin: '10px 0', cursor: 'pointer', fontSize: '14px' },
+  checkbox: { width: '16px', height: '16px', cursor: 'pointer' },
   submitBtn: { width: '100%', padding: '10px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }
 };
 

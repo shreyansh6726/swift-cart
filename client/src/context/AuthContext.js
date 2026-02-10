@@ -43,14 +43,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const storageRef = useRef(null); // current storage (localStorage or sessionStorage)
 
-  // Fetch Cart Helper
+  // Fetch Cart Helper - tolerates 404 when backend cart API is not available
   const fetchCart = async () => {
     try {
       const { data } = await API.get('/customers/cart');
-      setCart(data.cart);
-      setCartTotal(data.cartTotal);
+      setCart(data.cart ?? []);
+      setCartTotal(data.cartTotal ?? 0);
     } catch (error) {
-      console.error("Failed to fetch cart", error);
+      if (error.response?.status !== 404) {
+        console.error("Failed to fetch cart", error);
+      }
+      setCart([]);
+      setCartTotal(0);
     }
   };
 
@@ -63,10 +67,14 @@ export const AuthProvider = ({ children }) => {
         if (stored.user.role === 'customer') {
           try {
             const { data } = await API.get('/customers/cart');
-            setCart(data.cart);
-            setCartTotal(data.cartTotal);
+            setCart(data.cart ?? []);
+            setCartTotal(data.cartTotal ?? 0);
           } catch (err) {
-            console.error("Error syncing cart", err);
+            if (err.response?.status !== 404) {
+              console.error("Error syncing cart", err);
+            }
+            setCart([]);
+            setCartTotal(0);
           }
         }
       }

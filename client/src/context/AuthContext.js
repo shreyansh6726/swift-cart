@@ -117,10 +117,13 @@ export const AuthProvider = ({ children }) => {
       const { data } = await API.post('/customers/cart/add', { productId, quantity });
       setCart(data.cart);
       setCartTotal(data.cartTotal);
-      // alert("Cart updated!"); // Optional: Remove alert for better UX with quantity controls
     } catch (error) {
-      console.error("Add to cart error", error);
-      alert("Failed to add to cart");
+      if (error.response?.status === 404) {
+        alert("Cart service is unavailable. Check that the backend is deployed and reachable.");
+      } else {
+        console.error("Add to cart error", error);
+        alert("Failed to add to cart");
+      }
     }
   };
 
@@ -130,7 +133,9 @@ export const AuthProvider = ({ children }) => {
       setCart(data.cart);
       setCartTotal(data.cartTotal);
     } catch (error) {
-      console.error("Remove from cart error", error);
+      if (error.response?.status !== 404) {
+        console.error("Remove from cart error", error);
+      }
     }
   };
 
@@ -140,7 +145,9 @@ export const AuthProvider = ({ children }) => {
       setCart(data.cart);
       setCartTotal(data.cartTotal);
     } catch (error) {
-      console.error("Update quantity error", error);
+      if (error.response?.status !== 404) {
+        console.error("Update quantity error", error);
+      }
     }
   }
 

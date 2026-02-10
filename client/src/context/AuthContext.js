@@ -4,6 +4,8 @@ import API from '../api';
 export const AuthContext = createContext();
 
 // Helper: get auth from whichever storage has it (persistent first, then session)
+const CART_API_FLAG = 'cartApiAvailable';
+
 const getStoredAuth = () => {
   const fromLocal = localStorage.getItem('userInfo') && localStorage.getItem('token');
   if (fromLocal) {
@@ -45,12 +47,20 @@ export const AuthProvider = ({ children }) => {
 
   // Fetch Cart Helper - tolerates 404 when backend cart API is not available
   const fetchCart = async () => {
+    if (sessionStorage.getItem(CART_API_FLAG) === 'false') {
+      setCart([]);
+      setCartTotal(0);
+      return;
+    }
     try {
       const { data } = await API.get('/customers/cart');
+      sessionStorage.setItem(CART_API_FLAG, 'true');
       setCart(data.cart ?? []);
       setCartTotal(data.cartTotal ?? 0);
     } catch (error) {
-      if (error.response?.status !== 404) {
+      if (error.response?.status === 404) {
+        sessionStorage.setItem(CART_API_FLAG, 'false');
+      } else {
         console.error("Failed to fetch cart", error);
       }
       setCart([]);
@@ -65,16 +75,24 @@ export const AuthProvider = ({ children }) => {
         storageRef.current = stored.storage;
         setUser(stored.user);
         if (stored.user.role === 'customer') {
-          try {
-            const { data } = await API.get('/customers/cart');
-            setCart(data.cart ?? []);
-            setCartTotal(data.cartTotal ?? 0);
-          } catch (err) {
-            if (err.response?.status !== 404) {
-              console.error("Error syncing cart", err);
-            }
+          if (sessionStorage.getItem(CART_API_FLAG) === 'false') {
             setCart([]);
             setCartTotal(0);
+          } else {
+            try {
+              const { data } = await API.get('/customers/cart');
+              sessionStorage.setItem(CART_API_FLAG, 'true');
+              setCart(data.cart ?? []);
+              setCartTotal(data.cartTotal ?? 0);
+            } catch (err) {
+              if (err.response?.status === 404) {
+                sessionStorage.setItem(CART_API_FLAG, 'false');
+              } else {
+                console.error("Error syncing cart", err);
+              }
+              setCart([]);
+              setCartTotal(0);
+            }
           }
         }
       }
@@ -97,6 +115,7 @@ export const AuthProvider = ({ children }) => {
     if (token) storage.setItem('token', token);
 
     if (userData.role === 'customer') {
+      sessionStorage.removeItem(CART_API_FLAG); // retry cart API after fresh login
       fetchCart();
     }
   };

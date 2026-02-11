@@ -16,7 +16,7 @@ const calculateTotal = async (cart) => {
 exports.addToCart = async (req, res) => {
     try {
         const { productId, quantity = 1 } = req.body;
-        const customerId = req.user.id;
+        const customerId = req.user._id;
 
         const customer = await Customer.findById(customerId);
         if (!customer) return res.status(404).json({ message: 'Customer not found' });
@@ -47,7 +47,7 @@ exports.addToCart = async (req, res) => {
 exports.removeFromCart = async (req, res) => {
     try {
         const { productId } = req.body; // If strictly removing
-        const customerId = req.user.id;
+        const customerId = req.user._id;
 
         const customer = await Customer.findById(customerId);
         if (!customer) return res.status(404).json({ message: 'Customer not found' });
@@ -65,7 +65,7 @@ exports.removeFromCart = async (req, res) => {
 exports.updateCartItemQuantity = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
-        const customerId = req.user.id;
+        const customerId = req.user._id;
 
         const customer = await Customer.findById(customerId);
         if (!customer) return res.status(404).json({ message: 'Customer not found' });
@@ -94,7 +94,7 @@ exports.updateCartItemQuantity = async (req, res) => {
 
 exports.getCart = async (req, res) => {
     try {
-        const customerId = req.user.id;
+        const customerId = req.user._id;
         const customer = await Customer.findById(customerId);
 
         if (!customer) return res.status(404).json({ message: 'Customer not found' });

@@ -66,7 +66,7 @@ exports.loginCustomer = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const { name, age, phone, address } = req.body;
-    const customerId = req.user.id; // From auth middleware
+    const customerId = req.user._id; // From auth middleware
 
     const customer = await Customer.findById(customerId);
     if (!customer) {

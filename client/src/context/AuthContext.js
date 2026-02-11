@@ -138,7 +138,17 @@ export const AuthProvider = ({ children }) => {
       setCartTotal(data.cartTotal);
     } catch (error) {
       if (error.response?.status === 404) {
-        alert("Cart service is unavailable. Check that the backend is deployed and reachable.");
+        // Check if it's a specific "Not Found" message from the backend
+        const errorMessage = error.response.data?.message;
+        if (errorMessage === 'Customer not found') {
+          alert("Session invalid. Please log in again.");
+          logout();
+        } else if (errorMessage === 'Product not found') {
+          alert("This product is no longer available.");
+        } else {
+          // If it's a 404 but not a known JSON error, likely the service/route is missing
+          alert("Cart service is unavailable. Check that the backend is deployed and reachable.");
+        }
       } else {
         console.error("Add to cart error", error);
         alert("Failed to add to cart");

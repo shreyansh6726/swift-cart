@@ -25,6 +25,10 @@ exports.addToCart = async (req, res) => {
         const product = await Product.findOne({ productId });
         if (!product) return res.status(404).json({ message: 'Product not found' });
 
+        if (!customer.cart) {
+            customer.cart = [];
+        }
+
         const existingItemIndex = customer.cart.findIndex(item => item.productId === Number(productId));
 
         if (existingItemIndex > -1) {

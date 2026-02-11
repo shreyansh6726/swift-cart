@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       if (error.response?.status === 404) {
         sessionStorage.setItem(CART_API_FLAG, 'false');
       } else {
-        console.error("Failed to fetch cart", error);
+        console.error("Failed to fetch cart", error, error.response?.data);
       }
       setCart([]);
       setCartTotal(0);
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
               if (err.response?.status === 404) {
                 sessionStorage.setItem(CART_API_FLAG, 'false');
               } else {
-                console.error("Error syncing cart", err);
+                console.error("Error syncing cart", err, err.response?.data);
               }
               setCart([]);
               setCartTotal(0);
@@ -150,8 +150,8 @@ export const AuthProvider = ({ children }) => {
           alert("Cart service is unavailable. Check that the backend is deployed and reachable.");
         }
       } else {
-        console.error("Add to cart error", error);
-        alert("Failed to add to cart");
+        console.error("Add to cart error", error, error.response?.data);
+        alert(`Failed to add to cart: ${error.response?.data?.message || error.message}`);
       }
     }
   };
@@ -163,7 +163,7 @@ export const AuthProvider = ({ children }) => {
       setCartTotal(data.cartTotal);
     } catch (error) {
       if (error.response?.status !== 404) {
-        console.error("Remove from cart error", error);
+        console.error("Remove from cart error", error, error.response?.data);
       }
     }
   };
@@ -175,7 +175,7 @@ export const AuthProvider = ({ children }) => {
       setCartTotal(data.cartTotal);
     } catch (error) {
       if (error.response?.status !== 404) {
-        console.error("Update quantity error", error);
+        console.error("Update quantity error", error, error.response?.data);
       }
     }
   }

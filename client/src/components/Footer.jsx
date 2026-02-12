@@ -51,10 +51,10 @@ const Footer = () => {
                     <div>
                         <h4 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1.25rem' }}>Follow Us</h4>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <a href="#" style={{ color: '#cbd5e1', transition: 'color 0.2s' }}><Facebook size={20} /></a>
-                            <a href="#" style={{ color: '#cbd5e1', transition: 'color 0.2s' }}><Twitter size={20} /></a>
-                            <a href="#" style={{ color: '#cbd5e1', transition: 'color 0.2s' }}><Instagram size={20} /></a>
-                            <a href="#" style={{ color: '#cbd5e1', transition: 'color 0.2s' }}><Linkedin size={20} /></a>
+                            <button aria-label="Facebook" style={{ color: '#cbd5e1', transition: 'color 0.2s', cursor: 'pointer' }}><Facebook size={20} /></button>
+                            <button aria-label="Twitter" style={{ color: '#cbd5e1', transition: 'color 0.2s', cursor: 'pointer' }}><Twitter size={20} /></button>
+                            <button aria-label="Instagram" style={{ color: '#cbd5e1', transition: 'color 0.2s', cursor: 'pointer' }}><Instagram size={20} /></button>
+                            <button aria-label="LinkedIn" style={{ color: '#cbd5e1', transition: 'color 0.2s', cursor: 'pointer' }}><Linkedin size={20} /></button>
                         </div>
                     </div>
                 </div>

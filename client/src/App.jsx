@@ -14,6 +14,7 @@ import AddProduct from './pages/AddProduct';
 import ProductDetails from './pages/ProductDetails';
 import Profile from './pages/Profile';
 import ProductList from './pages/ProductList';
+import Footer from './components/Footer';
 
 // Separate component to use useLocation hook
 const AnimatedRoutes = () => {
@@ -58,7 +59,7 @@ const AnimatedRoutes = () => {
   );
 };
 
-import Footer from './components/Footer';
+
 
 const AppContent = () => {
   const { loading } = useContext(AuthContext);

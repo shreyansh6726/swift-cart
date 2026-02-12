@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ShoppingCart, User, LogOut, Menu, X, PlusCircle, Home, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Navbar.css';
+import logo from '../assets/logo.png';
 
 const Navbar = ({ toggleCart }) => {
   const { user, logout, cart } = useContext(AuthContext);
@@ -25,8 +26,10 @@ const Navbar = ({ toggleCart }) => {
   return (
     <header className="navbar-container">
       <div className="navbar-content container">
+
         {/* Logo */}
         <Link to="/" className="navbar-logo">
+          <img src={logo} alt="SwiftCart Logo" className="logo-img" style={{ height: '32px', marginRight: '0.5rem' }} />
           <span className="logo-text">SwiftCart</span>
           <span className="logo-dot">.</span>
         </Link>

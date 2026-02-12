@@ -5,9 +5,19 @@ import { X, Trash2, ShoppingBag } from 'lucide-react';
 import './CartSidebar.css';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-    const { cart, removeFromCart } = useContext(AuthContext);
+    const { cart, removeFromCart, cartTotal } = useContext(AuthContext); // Use cartTotal from context if available
 
-    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    // Fallback calculation if context doesn't provide total (though it seems it does)
+    // Ensure we safely access product properties
+    const calculateTotal = () => {
+        if (cartTotal !== undefined && cartTotal !== null) return cartTotal;
+        return cart.reduce((sum, item) => {
+            const price = item.product?.price || 0;
+            return sum + (price * item.quantity);
+        }, 0);
+    };
+
+    const displayTotal = calculateTotal();
 
     return (
         <AnimatePresence>
@@ -47,29 +57,41 @@ const CartSidebar = ({ isOpen, onClose }) => {
                                     </button>
                                 </div>
                             ) : (
-                                cart.map((item, index) => (
-                                    <motion.div
-                                        layout
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        key={`${item._id}-${index}`}
-                                        className="cart-item"
-                                    >
-                                        <img src={item.images[0]} alt={item.name} className="cart-item-img" />
-                                        <div className="cart-item-details">
-                                            <h4>{item.name}</h4>
-                                            <p className="cart-item-price">Rs. {item.price}</p>
-                                        </div>
-                                        <button
-                                            onClick={() => removeFromCart(item._id)}
-                                            className="remove-btn"
-                                            title="Remove item"
+                                cart.map((item, index) => {
+                                    // Safely access product properties. 
+                                    // If 'product' is missing (e.g. deleted product), handle gracefully.
+                                    const product = item.product || {};
+                                    const productName = product.name || 'Unknown Item';
+                                    const productPrice = product.price || 0;
+                                    const productImage = (product.images && product.images.length > 0)
+                                        ? product.images[0]
+                                        : 'https://via.placeholder.com/60';
+
+                                    return (
+                                        <motion.div
+                                            layout
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            key={`${item._id || index}`}
+                                            className="cart-item"
                                         >
-                                            <Trash2 size={18} />
-                                        </button>
-                                    </motion.div>
-                                ))
+                                            <img src={productImage} alt={productName} className="cart-item-img" />
+                                            <div className="cart-item-details">
+                                                <h4>{productName}</h4>
+                                                <p className="cart-item-info">Qty: {item.quantity}</p>
+                                                <p className="cart-item-price">Rs. {productPrice * item.quantity}</p>
+                                            </div>
+                                            <button
+                                                onClick={() => removeFromCart(item.productId)} // Ensure we pass the productId correctly
+                                                className="remove-btn"
+                                                title="Remove item"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </motion.div>
+                                    );
+                                })
                             )}
                         </div>
 
@@ -77,7 +99,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                             <div className="cart-footer">
                                 <div className="cart-total">
                                     <span>Total</span>
-                                    <span>Rs. {total}</span>
+                                    <span>Rs. {displayTotal}</span>
                                 </div>
                                 <button className="btn btn-primary btn-block">
                                     Proceed to Checkout

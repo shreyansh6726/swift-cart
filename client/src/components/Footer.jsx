@@ -34,15 +34,15 @@ const Footer = () => {
                         <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <li style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#cbd5e1' }}>
                                 <MapPin size={18} />
-                                <span>123 Corporate Blvd, Tech City</span>
+                                <span>Gurgaon, Haryana</span>
                             </li>
                             <li style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#cbd5e1' }}>
                                 <Phone size={18} />
-                                <span>+1 (555) 123-4567</span>
+                                <span>+91 9958639220</span>
                             </li>
                             <li style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#cbd5e1' }}>
                                 <Mail size={18} />
-                                <span>support@swiftcart.com</span>
+                                <span>shreyansh.official.6726@gmail.com</span>
                             </li>
                         </ul>
                     </div>

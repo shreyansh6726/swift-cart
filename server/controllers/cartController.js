@@ -15,18 +15,24 @@ const calculateTotal = async (cart) => {
 
 // Helper to get populated cart items
 const getPopulatedCart = async (cart) => {
+    console.log("Populating cart items:", cart);
     const cartItems = [];
     for (const item of cart) {
+        console.log("Finding product for ID:", item.productId);
         const product = await Product.findOne({ productId: item.productId });
         if (product) {
+            console.log("Product found:", product.name);
             cartItems.push({
-                _id: item._id, // Keep the item subdocument ID
+                _id: item._id,
                 productId: item.productId,
                 quantity: item.quantity,
                 product: product
             });
+        } else {
+            console.log("Product NOT found for ID:", item.productId);
         }
     }
+    console.log("Final populated cart items:", cartItems.length);
     return cartItems;
 };
 

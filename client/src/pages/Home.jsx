@@ -66,7 +66,22 @@ const Home = () => {
           >
             <div className="hero-shape"></div>
             {/* Placeholder for Hero Image - using a gradient/abstract shape for now */}
-            <div className="hero-image-placeholder">
+            import homePhoto from '../assets/home_photo.jpg';
+
+            // ... (inside component)
+
+            <div className="hero-image-placeholder" style={{ background: 'none', boxShadow: 'none' }}>
+              <img
+                src={homePhoto}
+                alt="Premium Shopping"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: 'var(--radius-lg)',
+                  boxShadow: 'var(--shadow-lg)'
+                }}
+              />
               <div className="floating-card card-1">
                 <span>Premium Quality</span>
               </div>

@@ -13,6 +13,23 @@ const calculateTotal = async (cart) => {
     return total;
 };
 
+// Helper to get populated cart items
+const getPopulatedCart = async (cart) => {
+    const cartItems = [];
+    for (const item of cart) {
+        const product = await Product.findOne({ productId: item.productId });
+        if (product) {
+            cartItems.push({
+                _id: item._id, // Keep the item subdocument ID
+                productId: item.productId,
+                quantity: item.quantity,
+                product: product
+            });
+        }
+    }
+    return cartItems;
+};
+
 exports.addToCart = async (req, res) => {
     try {
         const { productId, quantity = 1 } = req.body;
@@ -40,9 +57,11 @@ exports.addToCart = async (req, res) => {
         }
 
         customer.cartTotal = await calculateTotal(customer.cart);
-        await customer.save();
+        const updatedCustomer = await customer.save();
 
-        res.json({ message: 'Cart updated', cart: customer.cart, cartTotal: customer.cartTotal });
+        // Return populated cart
+        const populatedCart = await getPopulatedCart(updatedCustomer.cart);
+        res.json({ message: 'Cart updated', cart: populatedCart, cartTotal: updatedCustomer.cartTotal });
     } catch (error) {
         console.error("addToCart Error:", error);
         res.status(500).json({ message: error.message });
@@ -51,7 +70,7 @@ exports.addToCart = async (req, res) => {
 
 exports.removeFromCart = async (req, res) => {
     try {
-        const { productId } = req.body; // If strictly removing
+        const { productId } = req.body;
         const customerId = req.user._id;
 
         const customer = await Customer.findById(customerId);
@@ -59,9 +78,10 @@ exports.removeFromCart = async (req, res) => {
 
         customer.cart = customer.cart.filter(item => item.productId !== Number(productId));
         customer.cartTotal = await calculateTotal(customer.cart);
-        await customer.save();
+        const updatedCustomer = await customer.save();
 
-        res.json({ message: 'Item removed from cart', cart: customer.cart, cartTotal: customer.cartTotal });
+        const populatedCart = await getPopulatedCart(updatedCustomer.cart);
+        res.json({ message: 'Item removed from cart', cart: populatedCart, cartTotal: updatedCustomer.cartTotal });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -86,8 +106,10 @@ exports.updateCartItemQuantity = async (req, res) => {
             }
 
             customer.cartTotal = await calculateTotal(customer.cart);
-            await customer.save();
-            res.json({ message: 'Cart updated', cart: customer.cart, cartTotal: customer.cartTotal });
+            const updatedCustomer = await customer.save();
+
+            const populatedCart = await getPopulatedCart(updatedCustomer.cart);
+            res.json({ message: 'Cart updated', cart: populatedCart, cartTotal: updatedCustomer.cartTotal });
         } else {
             res.status(404).json({ message: 'Item not in cart' });
         }
@@ -104,20 +126,8 @@ exports.getCart = async (req, res) => {
 
         if (!customer) return res.status(404).json({ message: 'Customer not found' });
 
-        // Populate product details manually since we store productId (Number) not ObjectId
-        const cartItems = [];
-        for (const item of customer.cart) {
-            const product = await Product.findOne({ productId: item.productId });
-            if (product) {
-                cartItems.push({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    product: product
-                });
-            }
-        }
-
-        res.json({ cart: cartItems, cartTotal: customer.cartTotal });
+        const populatedCart = await getPopulatedCart(customer.cart);
+        res.json({ cart: populatedCart, cartTotal: customer.cartTotal });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

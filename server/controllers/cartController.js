@@ -15,13 +15,13 @@ const calculateTotal = async (cart) => {
 
 // Helper to get populated cart items
 const getPopulatedCart = async (cart) => {
-    console.log("Populating cart items:", cart);
+    console.log("DEBUG BACKEND: Populating cart items (raw):", JSON.stringify(cart, null, 2));
     const cartItems = [];
     for (const item of cart) {
-        console.log("Finding product for ID:", item.productId);
+        console.log("DEBUG BACKEND: Finding product for ID:", item.productId, "Type:", typeof item.productId);
         const product = await Product.findOne({ productId: item.productId });
         if (product) {
-            console.log("Product found:", product.name);
+            console.log("DEBUG BACKEND: Product found:", product.name);
             cartItems.push({
                 _id: item._id,
                 productId: item.productId,
@@ -29,10 +29,10 @@ const getPopulatedCart = async (cart) => {
                 product: product
             });
         } else {
-            console.log("Product NOT found for ID:", item.productId);
+            console.log("DEBUG BACKEND: Product NOT found for ID:", item.productId);
         }
     }
-    console.log("Final populated cart items:", cartItems.length);
+    console.log("DEBUG BACKEND: Final populated cart size:", cartItems.length);
     return cartItems;
 };
 

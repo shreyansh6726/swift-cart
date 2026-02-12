@@ -7,6 +7,8 @@ import './CartSidebar.css';
 const CartSidebar = ({ isOpen, onClose }) => {
     const { cart, removeFromCart, cartTotal } = useContext(AuthContext); // Use cartTotal from context if available
 
+    console.log("DEBUG FRONTEND: Cart state is:", JSON.stringify(cart, null, 2));
+
     // Fallback calculation if context doesn't provide total (though it seems it does)
     // Ensure we safely access product properties
     const calculateTotal = () => {

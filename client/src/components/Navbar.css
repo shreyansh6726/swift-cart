@@ -189,7 +189,7 @@
 .mobile-nav-links {
   padding: 1rem 1.5rem;
   display: flex;
-  flex-col: column;
+  flex-direction: column;
   gap: 0.5rem;
 }
 

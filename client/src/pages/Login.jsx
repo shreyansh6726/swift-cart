@@ -1,7 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import API from '../api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import './Auth.css';
 
 const Login = () => {
   const [isRetailer, setIsRetailer] = useState(false);
@@ -9,94 +11,113 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [keepLoggedIn, setKeepLoggedIn] = useState(true);
   const [error, setError] = useState('');
-  
+  const [loading, setLoading] = useState(false);
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     const endpoint = isRetailer ? '/retailers/login' : '/customers/login';
 
     try {
       const { data } = await API.post(endpoint, { email, password });
+      // Simulate a small delay for the loading animation to show "Verifying credentials"
       const userData = { ...data, role: isRetailer ? 'retailer' : 'customer' };
       login(userData, data.token, keepLoggedIn);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError(err.response?.data?.message || 'Login failed. Please verify your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.card}>
-        <h2>{isRetailer ? 'Retailer Login' : 'Customer Login'}</h2>
-        
-        {}
-        <div style={styles.toggleContainer}>
-          <button 
-            type="button" 
+    <div className="auth-container">
+      <motion.div
+        className="auth-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h2 className="auth-title">Welcome Back</h2>
+
+        <div className="auth-toggle">
+          <button
+            type="button"
             onClick={() => setIsRetailer(false)}
-            style={!isRetailer ? styles.activeTab : styles.inactiveTab}
+            className={`toggle-btn ${!isRetailer ? 'active' : ''}`}
           >
             Customer
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => setIsRetailer(true)}
-            style={isRetailer ? styles.activeTab : styles.inactiveTab}
+            className={`toggle-btn ${isRetailer ? 'active' : ''}`}
           >
             Retailer
           </button>
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="error-msg">{error}</motion.div>}
 
-        <input 
-          type="email" 
-          placeholder="Email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-          style={styles.input}
-        />
-        <input 
-          type="password" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-          style={styles.input}
-        />
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label className="form-label">Email Address</label>
+            <input
+              type="email"
+              className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="name@company.com"
+            />
+          </div>
 
-        <label style={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={keepLoggedIn}
-            onChange={(e) => setKeepLoggedIn(e.target.checked)}
-            style={styles.checkbox}
-          />
-          Keep me logged in
-        </label>
+          <div className="form-group">
+            <label className="form-label">Password</label>
+            <input
+              type="password"
+              className="form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
+          </div>
 
-        <button type="submit" style={styles.submitBtn}>Login</button>
-      </form>
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              className="checkbox-input"
+              checked={keepLoggedIn}
+              onChange={(e) => setKeepLoggedIn(e.target.checked)}
+            />
+            Keep me logged in
+          </label>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: '100%', marginTop: '0.5rem' }}
+            disabled={loading}
+          >
+            {loading ? 'Verifying...' : `Login as ${isRetailer ? 'Retailer' : 'Customer'}`}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          Don't have an account?
+          <Link to="/register" className="auth-link">Sign up</Link>
+        </div>
+      </motion.div>
     </div>
   );
-};
-
-const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f4f4' },
-  card: { padding: '2rem', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '350px' },
-  toggleContainer: { display: 'flex', marginBottom: '1rem', border: '1px solid #ccc', borderRadius: '4px' },
-  activeTab: { flex: 1, padding: '10px', backgroundColor: '#007bff', color: '#fff', border: 'none', cursor: 'pointer' },
-  inactiveTab: { flex: 1, padding: '10px', backgroundColor: '#fff', color: '#000', border: 'none', cursor: 'pointer' },
-  input: { width: '100%', padding: '10px', margin: '10px 0', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' },
-  checkboxLabel: { display: 'flex', alignItems: 'center', gap: '8px', margin: '10px 0', cursor: 'pointer', fontSize: '14px' },
-  checkbox: { width: '16px', height: '16px', cursor: 'pointer' },
-  submitBtn: { width: '100%', padding: '10px', backgroundColor: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }
 };
 
 export default Login;

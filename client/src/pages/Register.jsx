@@ -1,7 +1,9 @@
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import API from '../api';
 import { AuthContext } from '../context/AuthContext';
+import { motion } from 'framer-motion';
+import './Auth.css';
 
 const Register = () => {
   const { login } = useContext(AuthContext);
@@ -14,11 +16,12 @@ const Register = () => {
     gender: '',
     phone: '',
     address: '',
-    shopName: '',    
-    ownerName: '',   
-    retailerId: '',  
+    shopName: '',
+    ownerName: '',
+    retailerId: '',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,80 +31,126 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     const endpoint = isRetailer ? 'retailers/register' : 'customers/register';
-    
+
     const payload = {
       ...formData,
       age: Number(formData.age),
       retailerId: isRetailer ? Number(formData.retailerId) : undefined,
-      ownerName: isRetailer ? (formData.ownerName || formData.name) : undefined 
+      ownerName: isRetailer ? (formData.ownerName || formData.name) : undefined
     };
 
     try {
       const res = await API.post(endpoint, payload);
-      login(res.data); 
-      alert('Registration successful!');
+      login(res.data);
+      // alert('Registration successful!'); // Removed for cleaner UX
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || 'Registration failed. Please check your inputs.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.card}>
-        <h2>{isRetailer ? 'Retailer Sign Up' : 'Customer Sign Up'}</h2>
+    <div className="auth-container">
+      <motion.div
+        className="auth-card"
+        style={{ maxWidth: '600px' }} // Slightly wider for register form
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h2 className="auth-title">Create Account</h2>
+        <p className="auth-subtitle">Join us today for a premium shopping experience.</p>
 
-        <div style={styles.toggleContainer}>
-          <button type="button" onClick={() => setIsRetailer(false)} style={!isRetailer ? styles.activeTab : styles.inactiveTab}>Customer</button>
-          <button type="button" onClick={() => setIsRetailer(true)} style={isRetailer ? styles.activeTab : styles.inactiveTab}>Retailer</button>
+        <div className="auth-toggle">
+          <button type="button" onClick={() => setIsRetailer(false)} className={`toggle-btn ${!isRetailer ? 'active' : ''}`}>Customer</button>
+          <button type="button" onClick={() => setIsRetailer(true)} className={`toggle-btn ${isRetailer ? 'active' : ''}`}>Retailer</button>
         </div>
 
-        {error && <p style={{ color: 'red', fontSize: '12px' }}>{error}</p>}
+        {error && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="error-msg">{error}</motion.div>}
 
-        {}
-        <input name="name" placeholder="Full Name" onChange={handleChange} required style={styles.input} />
-        <input name="email" type="email" placeholder="Email" onChange={handleChange} required style={styles.input} />
-        <input name="password" type="password" placeholder="Password" onChange={handleChange} required style={styles.input} />
-        
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <input name="age" type="number" placeholder="Age" onChange={handleChange} required style={styles.input} />
-          <select name="gender" onChange={handleChange} required style={styles.input}>
-            <option value="">Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label className="form-label">Full Name</label>
+            <input name="name" className="form-input" placeholder="John Doe" onChange={handleChange} required />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input name="email" type="email" className="form-input" placeholder="name@company.com" onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <input name="password" type="password" className="form-input" placeholder="••••••••" onChange={handleChange} required />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Age</label>
+              <input name="age" type="number" className="form-input" placeholder="25" onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Gender</label>
+              <select name="gender" className="form-input" onChange={handleChange} required>
+                <option value="">Select...</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Phone Number</label>
+            <input name="phone" className="form-input" placeholder="+1 (555) 000-0000" onChange={handleChange} required />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Address</label>
+            <input name="address" className="form-input" placeholder="123 Corporate Blvd, Suite 100" onChange={handleChange} required />
+          </div>
+
+          {isRetailer && (
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="auth-form" style={{ marginTop: '0.5rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">Shop Name</label>
+                <input name="shopName" className="form-input" placeholder="My Shop" onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Owner Name</label>
+                <input name="ownerName" className="form-input" placeholder="Owner Name" onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Retailer ID</label>
+                <input name="retailerId" className="form-input" placeholder="Numeric ID" onChange={handleChange} required />
+              </div>
+            </motion.div>
+          )}
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ width: '100%', marginTop: '1rem' }}
+            disabled={loading}
+          >
+            {loading ? 'Creating Account...' : 'Create Account'}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          Already have an account?
+          <Link to="/login" className="auth-link">Log in</Link>
         </div>
-
-        <input name="phone" placeholder="Phone Number" onChange={handleChange} required style={styles.input} />
-        <input name="address" placeholder="Residential Address" onChange={handleChange} required style={styles.input} />
-
-        {}
-        {isRetailer && (
-          <>
-            <hr />
-            <input name="shopName" placeholder="Shop Name" onChange={handleChange} required style={styles.input} />
-            <input name="ownerName" placeholder="Owner Name" onChange={handleChange} required style={styles.input} />
-            <input name="retailerId" placeholder="Retailer ID (Numeric)" onChange={handleChange} required style={styles.input} />
-          </>
-        )}
-
-        <button type="submit" style={styles.submitBtn}>Create Account</button>
-      </form>
+      </motion.div>
     </div>
   );
-};
-
-const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f4f4', padding: '20px' },
-  card: { padding: '2rem', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '450px' },
-  toggleContainer: { display: 'flex', marginBottom: '1rem', border: '1px solid #ccc', borderRadius: '4px', overflow: 'hidden' },
-  activeTab: { flex: 1, padding: '10px', backgroundColor: '#28a745', color: '#fff', border: 'none', cursor: 'pointer' },
-  inactiveTab: { flex: 1, padding: '10px', backgroundColor: '#fff', color: '#000', border: 'none', cursor: 'pointer' },
-  input: { width: '100%', padding: '10px', margin: '8px 0', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' },
-  submitBtn: { width: '100%', padding: '12px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }
 };
 
 export default Register;

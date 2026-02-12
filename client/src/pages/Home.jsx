@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import API from '../api';
 import { motion } from 'framer-motion';
 import { Search, ArrowRight } from 'lucide-react';
+import homePhoto from '../assets/home_photo.jpg';
 import './Home.css';
 
 const Home = () => {
@@ -66,10 +67,6 @@ const Home = () => {
           >
             <div className="hero-shape"></div>
             {/* Placeholder for Hero Image - using a gradient/abstract shape for now */}
-            import homePhoto from '../assets/home_photo.jpg';
-
-            // ... (inside component)
-
             <div className="hero-image-placeholder" style={{ background: 'none', boxShadow: 'none' }}>
               <img
                 src={homePhoto}

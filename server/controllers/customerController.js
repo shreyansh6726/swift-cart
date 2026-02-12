@@ -35,6 +35,11 @@ exports.registerCustomer = async (req, res) => {
       _id: customer._id,
       name: customer.name,
       email: customer.email,
+      age: customer.age,
+      gender: customer.gender,
+      phone: customer.phone,
+      address: customer.address,
+      role: 'customer',
       token: token,
       message: "Registration successful!"
     });
@@ -54,7 +59,17 @@ exports.loginCustomer = async (req, res) => {
     const customer = await Customer.findOne({ email });
     if (customer && (await bcrypt.compare(password, customer.password))) {
       const token = jwt.sign({ id: customer._id }, process.env.JWT_SECRET || 'default_secret', { expiresIn: '30d' });
-      res.json({ _id: customer._id, name: customer.name, email: customer.email, token: token });
+      res.json({
+        _id: customer._id,
+        name: customer.name,
+        email: customer.email,
+        age: customer.age,
+        gender: customer.gender,
+        phone: customer.phone,
+        address: customer.address,
+        role: 'customer',
+        token: token
+      });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -84,9 +99,11 @@ exports.updateProfile = async (req, res) => {
       _id: updatedCustomer._id,
       name: updatedCustomer.name,
       email: updatedCustomer.email,
+      age: updatedCustomer.age,
+      gender: updatedCustomer.gender,
       phone: updatedCustomer.phone,
       address: updatedCustomer.address,
-      age: updatedCustomer.age,
+      role: 'customer',
       message: "Profile updated successfully"
     });
   } catch (error) {

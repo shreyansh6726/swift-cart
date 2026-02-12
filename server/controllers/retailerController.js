@@ -33,6 +33,13 @@ exports.registerRetailer = async (req, res) => {
     res.status(201).json({
       _id: retailer._id,
       shopName: retailer.shopName,
+      ownerName: retailer.ownerName,
+      email: retailer.email,
+      age: retailer.age,
+      gender: retailer.gender,
+      phone: retailer.phone,
+      address: retailer.address,
+      role: 'retailer',
       token: token,
       message: "Retailer registered successfully"
     });
@@ -53,7 +60,18 @@ exports.loginRetailer = async (req, res) => {
     const retailer = await Retailer.findOne({ email });
     if (retailer && (await bcrypt.compare(password, retailer.password))) {
       const token = jwt.sign({ id: retailer._id }, process.env.JWT_SECRET || 'default_secret', { expiresIn: '30d' });
-      res.json({ _id: retailer._id, shopName: retailer.shopName, email: retailer.email, token: token });
+      res.json({
+        _id: retailer._id,
+        shopName: retailer.shopName,
+        ownerName: retailer.ownerName,
+        email: retailer.email,
+        age: retailer.age,
+        gender: retailer.gender,
+        phone: retailer.phone,
+        address: retailer.address,
+        role: 'retailer',
+        token: token
+      });
     } else {
       res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -85,9 +103,11 @@ exports.updateProfile = async (req, res) => {
       shopName: updatedRetailer.shopName,
       ownerName: updatedRetailer.ownerName,
       email: updatedRetailer.email,
+      age: updatedRetailer.age,
+      gender: updatedRetailer.gender,
       phone: updatedRetailer.phone,
       address: updatedRetailer.address,
-      age: updatedRetailer.age,
+      role: 'retailer',
       message: "Profile updated successfully"
     });
   } catch (error) {

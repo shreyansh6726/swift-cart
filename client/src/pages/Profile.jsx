@@ -12,7 +12,8 @@ const Profile = () => {
         email: '',
         phone: '',
         address: '',
-        age: ''
+        age: '',
+        gender: ''
     });
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -26,7 +27,8 @@ const Profile = () => {
                 email: user.email || '',
                 phone: user.phone || '',
                 address: user.address || '',
-                age: user.age || ''
+                age: user.age || '',
+                gender: user.gender || ''
             });
         }
     }, [user]);
@@ -133,6 +135,21 @@ const Profile = () => {
                         onChange={handleChange}
                         required
                     />
+                </div>
+
+                <div className="form-group">
+                    <label>Gender</label>
+                    <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
                 </div>
 
                 <button type="submit" className="update-btn">Update Profile</button>

@@ -1,11 +1,11 @@
 import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, ShoppingBag } from 'lucide-react';
+import { X, Trash2, ShoppingBag, Plus, Minus } from 'lucide-react';
 import './CartSidebar.css';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-    const { cart, removeFromCart, cartTotal } = useContext(AuthContext); // Use cartTotal from context if available
+    const { cart, removeFromCart, updateQuantity, cartTotal } = useContext(AuthContext); // Use cartTotal from context if available
 
     console.log("DEBUG FRONTEND: Cart state is:", JSON.stringify(cart, null, 2));
 
@@ -81,7 +81,22 @@ const CartSidebar = ({ isOpen, onClose }) => {
                                             <img src={productImage} alt={productName} className="cart-item-img" />
                                             <div className="cart-item-details">
                                                 <h4>{productName}</h4>
-                                                <p className="cart-item-info">Qty: {item.quantity}</p>
+                                                <div className="quantity-controls">
+                                                    <button
+                                                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                                                        className="qty-btn"
+                                                        disabled={item.quantity <= 1}
+                                                    >
+                                                        <Minus size={14} />
+                                                    </button>
+                                                    <span className="qty-val">{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                                                        className="qty-btn"
+                                                    >
+                                                        <Plus size={14} />
+                                                    </button>
+                                                </div>
                                                 <p className="cart-item-price">Rs. {productPrice * item.quantity}</p>
                                             </div>
                                             <button

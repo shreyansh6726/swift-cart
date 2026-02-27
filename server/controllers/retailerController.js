@@ -82,7 +82,7 @@ exports.loginRetailer = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { shopName, ownerName, age, phone, address } = req.body;
+    const { shopName, ownerName, age, phone, address, gender } = req.body;
     const retailerId = req.user._id; // From auth middleware
 
     const retailer = await Retailer.findById(retailerId);
@@ -95,6 +95,7 @@ exports.updateProfile = async (req, res) => {
     if (age) retailer.age = Number(age);
     if (phone) retailer.phone = phone;
     if (address) retailer.address = address;
+    if (gender) retailer.gender = gender;
 
     const updatedRetailer = await retailer.save();
 

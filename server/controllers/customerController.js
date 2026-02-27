@@ -80,7 +80,7 @@ exports.loginCustomer = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, age, phone, address } = req.body;
+    const { name, age, phone, address, gender } = req.body;
     const customerId = req.user._id; // From auth middleware
 
     const customer = await Customer.findById(customerId);
@@ -92,6 +92,7 @@ exports.updateProfile = async (req, res) => {
     if (age) customer.age = Number(age);
     if (phone) customer.phone = phone;
     if (address) customer.address = address;
+    if (gender) customer.gender = gender;
 
     const updatedCustomer = await customer.save();
 

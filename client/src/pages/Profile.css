@@ -30,7 +30,8 @@
     color: #555;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 4px;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const API_BASE_URL = 'http://localhost:5000/api/auth';
+const API_BASE_URL = import.meta.env.API_BASE_URL;
 
 export default function App() {
   const [isLogin, setIsLogin] = useState(true);

@@ -16,27 +16,17 @@
   },
   "rewrites": [
     {
-      "source": "/admin",
+      "source": "/admin/:path*",
       "destination": {
-        "service": "admin"
+        "service": "admin",
+        "path": "/:path*"
       }
     },
     {
-      "source": "/admin/(.*)",
+      "source": "/retailer/:path*",
       "destination": {
-        "service": "admin"
-      }
-    },
-    {
-      "source": "/retailer",
-      "destination": {
-        "service": "retailer"
-      }
-    },
-    {
-      "source": "/retailer/(.*)",
-      "destination": {
-        "service": "retailer"
+        "service": "retailer",
+        "path": "/:path*"
       }
     },
     {

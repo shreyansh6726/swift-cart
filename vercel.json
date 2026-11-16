@@ -19,28 +19,28 @@
       "source": "/admin",
       "destination": {
         "service": "admin",
-        "path": "/"
+        "path": "/admin"
       }
     },
     {
       "source": "/admin/(.*)",
       "destination": {
         "service": "admin",
-        "path": "/$1"
+        "path": "/admin"
       }
     },
     {
       "source": "/retailer",
       "destination": {
         "service": "retailer",
-        "path": "/"
+        "path": "/retailer"
       }
     },
     {
       "source": "/retailer/(.*)",
       "destination": {
         "service": "retailer",
-        "path": "/$1"
+        "path": "/retailer"
       }
     },
     {

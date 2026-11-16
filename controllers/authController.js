@@ -3,9 +3,15 @@ const UserCredential = require('../models/user/userCredential');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const getModels = (connection) => ({
+   User: connection.model('User', User.schema),
+   UserCredential: connection.model('UserCredential', UserCredential.schema)
+});
+
 // 1. REGISTER CONTROLLER
 exports.register = async (req, res) => {
    try {
+      const { User, UserCredential } = getModels(req.db);
       const { name, email, phone_number, gender, dob, password } = req.body;
 
       // Check if user already exists
@@ -48,6 +54,7 @@ exports.register = async (req, res) => {
 // 2. LOGIN CONTROLLER
 exports.login = async (req, res) => {
    try {
+      const { User, UserCredential } = getModels(req.db);
       const { email, password } = req.body;
 
       // Find user by email

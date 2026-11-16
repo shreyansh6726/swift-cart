@@ -1,9 +1,10 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const { connectDatabases } = require('./config/databases');
+const databaseContext = require('./middleware/databaseContext');
 
 const app = express();
 
@@ -11,16 +12,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use('/api/auth', authRoutes);
-
-// Database Connection & Server Start
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI;
 
-mongoose.connect(MONGO_URI)
-   .then(() => {
-      console.log('Connected to MongoDB successfully');
+async function startServer() {
+   try {
+      const databases = await connectDatabases();
+
+      // The route namespace determines which MongoDB connection is used.
+      app.use('/api/customer', databaseContext(databases.customer, 'customer'), authRoutes);
+      app.use('/api/retailer', databaseContext(databases.retailer, 'retailer'), authRoutes);
+      app.use('/api/admin', databaseContext(databases.admin, 'admin'), authRoutes);
+
+      // Backward-compatible alias for older customer clients.
+      app.use('/api/auth', databaseContext(databases.customer, 'customer'), authRoutes);
+
       app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-   })
-   .catch(err => console.error('Database connection error:', err));
+   } catch (error) {
+      console.error('Database connection error:', error);
+      process.exitCode = 1;
+   }
+}
+
+startServer();

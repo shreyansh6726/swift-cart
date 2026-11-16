@@ -19,34 +19,35 @@
       "source": "/admin",
       "destination": {
         "service": "admin",
-        "path": "/admin"
+        "path": "/index.html"
       }
     },
     {
       "source": "/admin/(.*)",
       "destination": {
         "service": "admin",
-        "path": "/admin"
+        "path": "/index.html"
       }
     },
     {
       "source": "/retailer",
       "destination": {
         "service": "retailer",
-        "path": "/retailer"
+        "path": "/index.html"
       }
     },
     {
       "source": "/retailer/(.*)",
       "destination": {
         "service": "retailer",
-        "path": "/retailer"
+        "path": "/index.html"
       }
     },
     {
       "source": "/",
       "destination": {
-        "service": "customer"
+        "service": "customer",
+        "path": "/index.html"
       }
     },
     {

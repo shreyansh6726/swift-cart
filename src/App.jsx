@@ -1,14 +1,16 @@
 import CustomerApp from '../customer/src/App.jsx'
+import AdminApp from '../admin/src/App.jsx'
+import RetailerApp from '../retailer/src/App.jsx'
 
 export default function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
 
   if (path === '/admin' || path.startsWith('/admin/')) {
-    return <LandingPage title="Admin Portal" description="Manage users, products, orders, and platform settings." />
+    return <AdminApp />
   }
 
   if (path === '/retailer' || path.startsWith('/retailer/')) {
-    return <LandingPage title="Retailer Portal" description="Manage your catalog, inventory, and customer orders." />
+    return <RetailerApp />
   }
 
   return <CustomerApp />

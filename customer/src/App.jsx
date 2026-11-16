@@ -50,9 +50,12 @@ export default function App() {
         };
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/customer/auth${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Frontend-Path': window.location.pathname
+        },
         body: JSON.stringify(payload)
       });
 

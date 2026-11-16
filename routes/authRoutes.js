@@ -10,7 +10,7 @@ router.post('/login', authController.login);
 // Protected Route Example
 router.get('/profile', verifyToken, async (req, res) => {
    try {
-      const User = require('../models/user');
+      const User = require('../models/user/user');
       const user = await User.findById(req.user.userId).select('-__v');
       res.status(200).json({ success: true, user });
    } catch (error) {

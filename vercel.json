@@ -16,9 +16,45 @@
   },
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/admin",
       "destination": {
         "service": "admin"
+      }
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": {
+        "service": "admin"
+      }
+    },
+    {
+      "source": "/retailer",
+      "destination": {
+        "service": "retailer"
+      }
+    },
+    {
+      "source": "/retailer/(.*)",
+      "destination": {
+        "service": "retailer"
+      }
+    },
+    {
+      "source": "/",
+      "destination": {
+        "service": "customer"
+      }
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": {
+        "service": "customer"
+      }
+    },
+    {
+      "source": "/favicon.svg",
+      "destination": {
+        "service": "customer"
       }
     }
   ]

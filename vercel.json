@@ -1,51 +1,25 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "services": {
-    "admin": {
-      "root": "admin",
-      "framework": "vite"
-    },
-    "customer": {
-      "root": "customer",
-      "framework": "vite"
-    },
-    "retailer": {
-      "root": "retailer",
-      "framework": "vite"
-    }
-  },
   "rewrites": [
     {
-      "source": "/admin/:path*",
-      "destination": {
-        "service": "admin",
-        "path": "/:path*"
-      }
+      "source": "/admin",
+      "destination": "https://your-app-admin.vercel.app/admin/"
     },
     {
-      "source": "/retailer/:path*",
-      "destination": {
-        "service": "retailer",
-        "path": "/:path*"
-      }
+      "source": "/admin/(.*)",
+      "destination": "https://your-app-admin.vercel.app/admin/$1"
     },
     {
-      "source": "/",
-      "destination": {
-        "service": "customer"
-      }
+      "source": "/retailer",
+      "destination": "https://your-app-retailer.vercel.app/retailer/"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": {
-        "service": "customer"
-      }
+      "source": "/retailer/(.*)",
+      "destination": "https://your-app-retailer.vercel.app/retailer/$1"
     },
     {
-      "source": "/favicon.svg",
-      "destination": {
-        "service": "customer"
-      }
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }

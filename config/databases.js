@@ -4,18 +4,28 @@ const connectionOptions = {
    serverSelectionTimeoutMS: 10000
 };
 
-async function connectDatabases() {
-   const uris = {
-      customer: process.env.CUSTOMER_MONGO_URI || process.env.MONGO_URI,
-      retailer: process.env.RETAILER_MONGO_URI || process.env.MONGO_URI,
-      admin: process.env.ADMIN_MONGO_URI || process.env.MONGO_URI
-   };
+function withDatabaseName(uri, databaseName) {
+   const match = uri.match(/^(mongodb(?:\+srv)?:\/\/[^/]+)(?:\/[^?]*)?(\?.*)?$/);
 
-   for (const [name, uri] of Object.entries(uris)) {
-      if (!uri) {
-         throw new Error(`${name.toUpperCase()}_MONGO_URI or MONGO_URI is not configured`);
-      }
+   if (!match) {
+      throw new Error('MONGO_URI must be a valid MongoDB connection string');
    }
+
+   return `${match[1]}/${databaseName}${match[2] || ''}`;
+}
+
+async function connectDatabases() {
+   const baseUri = process.env.MONGO_URI;
+
+   if (!baseUri) {
+      throw new Error('MONGO_URI is not configured');
+   }
+
+   const uris = {
+      customer: withDatabaseName(baseUri, 'user'),
+      retailer: withDatabaseName(baseUri, 'retailer'),
+      admin: withDatabaseName(baseUri, 'swift_cart_admin')
+   };
 
    const databases = {};
    for (const [name, uri] of Object.entries(uris)) {

@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
 const { connectDatabases } = require('./config/databases');
-const databaseContext = require('./middleware/databaseContext');
+const { createDatabaseByOriginMiddleware } = require('./middleware/databaseByOrigin');
 
 const app = express();
 
@@ -18,13 +18,8 @@ async function startServer() {
    try {
       const databases = await connectDatabases();
 
-      // The route namespace determines which MongoDB connection is used.
-      app.use('/api/customer', databaseContext(databases.customer, 'customer'), authRoutes);
-      app.use('/api/retailer', databaseContext(databases.retailer, 'retailer'), authRoutes);
-      app.use('/api/admin', databaseContext(databases.admin, 'admin'), authRoutes);
-
-      // Backward-compatible alias for older customer clients.
-      app.use('/api/auth', databaseContext(databases.customer, 'customer'), authRoutes);
+      // The browser Referer path determines which MongoDB connection is used.
+      app.use('/api/auth', createDatabaseByOriginMiddleware(databases), authRoutes);
 
       app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
    } catch (error) {

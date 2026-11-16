@@ -1,18 +1,23 @@
 const User = require('../models/user/user');
+const Admin = require('../models/admin/admin');
+const Retailer = require('../models/retailer/retailer');
 const UserCredential = require('../models/user/userCredential');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-const getModels = (connection) => ({
-   User: connection.model('User', User.schema),
+const getModels = (connection, clientApp) => ({
+   User: connection.model(
+      clientApp === 'admin' ? 'Admin' : clientApp === 'retailer' ? 'Retailer' : 'User',
+      clientApp === 'admin' ? Admin.schema : clientApp === 'retailer' ? Retailer.schema : User.schema
+   ),
    UserCredential: connection.model('UserCredential', UserCredential.schema)
 });
 
 // 1. REGISTER CONTROLLER
 exports.register = async (req, res) => {
    try {
-      const { User, UserCredential } = getModels(req.db);
-      const { name, email, phone_number, gender, dob, password } = req.body;
+      const { User, UserCredential } = getModels(req.db, req.clientApp);
+      const { name, email, phone_number, gender, dob, shop_name, shop_address, password } = req.body;
 
       // Check if user already exists
       const existingUser = await User.findOne({ email });
@@ -21,13 +26,12 @@ exports.register = async (req, res) => {
       }
 
       // Create the user profile
-      const user = new User({
-         name,
-         email,
-         phone_number,
-         gender,
-         dob
-      });
+      const profileData = req.clientApp === 'admin'
+         ? { name, email, phone_number }
+         : req.clientApp === 'retailer'
+            ? { name, email, phone_number, gender, dob, shop_name, shop_address }
+            : { name, email, phone_number, gender, dob };
+      const user = new User(profileData);
       await user.save();
 
       // Hash the password securely
@@ -54,7 +58,7 @@ exports.register = async (req, res) => {
 // 2. LOGIN CONTROLLER
 exports.login = async (req, res) => {
    try {
-      const { User, UserCredential } = getModels(req.db);
+      const { User, UserCredential } = getModels(req.db, req.clientApp);
       const { email, password } = req.body;
 
       // Find user by email

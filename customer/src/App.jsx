@@ -26,18 +26,31 @@ export default function App() {
     setMessage({ type: '', text: '' });
 
     const endpoint = isLogin ? '/login' : '/register';
+
+    // Accept numbers entered as either `9958639220` or `+91 99586 39220`,
+    // but send the API the 10-digit value expected by the User model.
+    const normalizedPhone = formData.phone_number.replace(/\D/g, '');
+    const phoneNumber = normalizedPhone.startsWith('91') && normalizedPhone.length === 12
+      ? normalizedPhone.slice(2)
+      : normalizedPhone;
+
+    if (!isLogin && phoneNumber.length !== 10) {
+      setMessage({ type: 'error', text: 'Enter a valid 10-digit phone number.' });
+      setLoading(false);
+      return;
+    }
     
     // Prepare payload (exclude extra registration fields during login)
     const payload = isLogin 
       ? { email: formData.email, password: formData.password }
       : { 
           ...formData, 
-          phone_number: Number(formData.phone_number),
+          phone_number: Number(phoneNumber),
           dob: new Date(formData.dob) 
         };
 
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -114,7 +127,8 @@ export default function App() {
                 style={styles.input} 
               />
               <input 
-                type="number" 
+                type="tel"
+                inputMode="tel"
                 name="phone_number" 
                 placeholder="10-Digit Phone Number" 
                 value={formData.phone_number} 

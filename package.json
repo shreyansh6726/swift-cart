@@ -1,0 +1,29 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "backend for swift cart containing all API endpoints.",
+  "homepage": "https://github.com/shreyansh6726/swift-cart#readme",
+  "bugs": {
+    "url": "https://github.com/shreyansh6726/swift-cart/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shreyansh6726/swift-cart.git"
+  },
+  "license": "ISC",
+  "author": "Shreyansh Srivastava",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm run test",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.12.1"
+  }
+}

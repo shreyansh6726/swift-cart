@@ -15,10 +15,30 @@ export default function App() {
   const [customerName, setCustomerName] = useState(localStorage.getItem('userName') || '');
   const [showAuth, setShowAuth] = useState(Boolean(localStorage.getItem('token')));
   const [greeting, setGreeting] = useState(getGreeting());
+  const [catalogItems, setCatalogItems] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState('');
 
   useEffect(() => {
     const interval = setInterval(() => setGreeting(getGreeting()), 60000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const loadCatalog = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/catalog/items`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || data.error || 'Unable to load products');
+        setCatalogItems(data.items);
+      } catch (error) {
+        setCatalogError(error.message);
+      } finally {
+        setCatalogLoading(false);
+      }
+    };
+
+    loadCatalog();
   }, []);
 
   const handleChange = (event) => setFormData({ ...formData, [event.target.name]: event.target.value });
@@ -78,7 +98,7 @@ export default function App() {
   };
 
   if (!showAuth && !customerName) {
-    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+    return <CustomerCatalog items={catalogItems} loading={catalogLoading} error={catalogError} onSignIn={() => setShowAuth(true)} />;
   }
 
   if (customerName) {
@@ -125,22 +145,40 @@ export default function App() {
   );
 }
 
-function LandingPage({ onGetStarted }) {
+function CustomerCatalog({ items, loading, error, onSignIn }) {
   return (
-    <main className="customer-landing">
-      <div className="star-field" />
-      <div className="planet planet-one" />
-      <div className="planet planet-two" />
-      <section className="landing-content">
-        <div className="brand-mark" aria-hidden="true">✦</div>
-        <p className="eyebrow">SWIFT CART / CUSTOMER</p>
-        <h1>Find your next <span>favourite.</span></h1>
-        <p className="landing-copy">Discover products you will love, from stores made for the way you shop.</p>
-        <button type="button" className="primary-button landing-button" onClick={onGetStarted}>Get started <span aria-hidden="true">↗</span></button>
-        <p className="landing-note">A little more joy in every cart.</p>
+    <main className="customer-catalog">
+      <header className="catalog-header">
+        <div>
+          <p className="eyebrow">SWIFT CART / CUSTOMER</p>
+          <h1>Find your next <span>favourite.</span></h1>
+          <p>Fresh picks from our retailer community.</p>
+        </div>
+        <button type="button" className="primary-button" onClick={onSignIn}>Sign in / Register</button>
+      </header>
+      <section className="catalog-content">
+        {loading && <p className="catalog-status">Loading products...</p>}
+        {!loading && error && <p className="catalog-status catalog-error">{error}</p>}
+        {!loading && !error && items.length === 0 && <p className="catalog-status">No products are available yet.</p>}
+        <div className="catalog-grid">
+          {items.map((item) => (
+            <article className="catalog-item" key={item._id}>
+              <div className="catalog-item-image">
+                {item.image_link?.[0] ? <img src={item.image_link[0]} alt={item.name} /> : <span>✦</span>}
+              </div>
+              <div className="catalog-item-body">
+                <p className="catalog-category">{item.category || 'Product'}</p>
+                <h2>{item.name}</h2>
+                <p className="catalog-description">{item.description || 'A new addition to your shopping list.'}</p>
+                <div className="catalog-item-footer">
+                  <strong>₹{item.offer ? item.offer_price : item.price}</strong>
+                  {item.offer && <span>₹{item.price}</span>}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
-      <div className="floating-chip chip-one">New favourites ✦</div>
-      <div className="floating-chip chip-two">Curated for you</div>
     </main>
   );
 }

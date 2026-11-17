@@ -6,6 +6,28 @@ body { margin: 0; font-family: 'DM Sans', sans-serif; }
 button, input, select { font: inherit; }
 .customer-landing, .customer-auth, .customer-home { min-height: 100vh; overflow: hidden; position: relative; }
 .customer-landing, .customer-home, .customer-auth { background: var(--wash); color: var(--ink); }
+.customer-catalog { background: var(--wash); color: var(--ink); min-height: 100vh; padding: 46px clamp(20px, 6vw, 88px); }
+.catalog-header { align-items: flex-end; display: flex; gap: 30px; justify-content: space-between; margin: 0 auto; max-width: 1240px; }
+.catalog-header .eyebrow { margin-bottom: 14px; }
+.catalog-header h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(40px, 6vw, 72px); letter-spacing: -3px; line-height: .98; margin: 0; }
+.catalog-header h1 span { color: var(--accent); display: block; }
+.catalog-header p:not(.eyebrow) { color: var(--muted); margin: 18px 0 0; }
+.catalog-content { margin: 52px auto 0; max-width: 1240px; }
+.catalog-grid { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.catalog-item { background: rgba(255,255,255,.82); border: 1px solid rgba(118,103,245,.12); border-radius: 18px; box-shadow: 0 14px 35px rgba(69,55,184,.08); overflow: hidden; transition: box-shadow .2s ease, transform .2s ease; }
+.catalog-item:hover { box-shadow: 0 20px 42px rgba(69,55,184,.14); transform: translateY(-4px); }
+.catalog-item-image { align-items: center; background: #e2e0ff; display: flex; height: 190px; justify-content: center; overflow: hidden; }
+.catalog-item-image img { height: 100%; object-fit: cover; width: 100%; }
+.catalog-item-image span { color: var(--accent); font-size: 46px; }
+.catalog-item-body { padding: 18px; }
+.catalog-category { color: var(--accent); font-size: 10px; font-weight: 700; letter-spacing: 1px; margin: 0 0 8px; text-transform: uppercase; }
+.catalog-item h2 { font-family: 'Space Grotesk', sans-serif; font-size: 19px; line-height: 1.15; margin: 0; }
+.catalog-description { color: var(--muted); font-size: 13px; line-height: 1.45; margin: 10px 0 18px; min-height: 38px; }
+.catalog-item-footer { align-items: center; display: flex; gap: 8px; }
+.catalog-item-footer strong { color: var(--deep); font-size: 18px; }
+.catalog-item-footer span { color: var(--muted); font-size: 12px; text-decoration: line-through; }
+.catalog-status { color: var(--muted); text-align: center; }
+.catalog-error { color: #c53b50; }
 .customer-landing { align-items: center; display: flex; justify-content: center; padding: 48px 24px; }
 .landing-content { max-width: 700px; position: relative; text-align: center; z-index: 1; }
 .brand-mark, .home-icon { align-items: center; background: var(--deep); border-radius: 20px; box-shadow: 0 16px 35px rgba(69, 55, 184, .25); color: #e6e2ff; display: flex; font-size: 23px; height: 58px; justify-content: center; margin: 0 auto 28px; transform: rotate(12deg); width: 58px; }

@@ -175,7 +175,7 @@ export default function App() {
       <main className="customer-auth">
         <section className="auth-card">
           <button type="button" className="back-button" onClick={handleAuthBack}>← Back to products</button>
-          <p className="eyebrow">SWIFT CART / CUSTOMER</p>
+          <p className="eyebrow">SWIFT CART ....</p>
           <h1>{isLogin ? 'Welcome back' : 'Join the community'}</h1>
           <p className="intro">{isLogin ? 'Sign in to pick up where you left off.' : 'Create an account and make every order count.'}</p>
           <div className="tabs">

@@ -42,7 +42,7 @@ export default function Homepage({
       />
       <header className="catalog-header">
         <div>
-          <p className="eyebrow">SWIFT CART / CUSTOMER</p>
+          <p className="eyebrow">SWIFT CART</p>
           <h1>Find your next <span>favourite.</span></h1>
           <p>Fresh picks from our retailer community.</p>
         </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import Cart from './pages/Cart';
+import Cart from './components/cart';
 import Homepage from './pages/homepage';
 import Payment from './pages/Payment';
 import Navbar from './components/navbar';
@@ -17,7 +17,7 @@ export default function App() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
   const [customerName, setCustomerName] = useState(localStorage.getItem('userName') || '');
-  const [showAuth, setShowAuth] = useState(Boolean(localStorage.getItem('token')));
+  const [showAuth, setShowAuth] = useState(false);
   const [greeting, setGreeting] = useState(getGreeting());
   const [catalogItems, setCatalogItems] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -27,6 +27,7 @@ export default function App() {
   const [cartMessage, setCartMessage] = useState('');
   const [customerView, setCustomerView] = useState('home');
   const [pendingAction, setPendingAction] = useState(null);
+  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => setGreeting(getGreeting()), 60000);
@@ -86,12 +87,13 @@ export default function App() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userName', data.user.name);
         setCustomerName(data.user.name);
-        setShowAuth(true);
+        setShowAuth(false);
         if (pendingAction === 'buy' && selectedItem) {
           setCustomerView('payment');
         } else if (pendingAction === 'cart' && selectedItem) {
           addItemToCart(selectedItem);
-          setCustomerView('cart');
+          setCustomerView('product');
+          setCartOpen(true);
         } else if (selectedItem && customerView === 'product') {
           setCustomerView('product');
         } else {
@@ -116,52 +118,50 @@ export default function App() {
     setCustomerName('');
     setShowAuth(false);
     setCustomerView('home');
+    setSelectedItem(null);
+    setPendingAction(null);
+    setCartOpen(false);
   };
 
-  if ((!showAuth && !customerName) || (customerName && customerView === 'home')) {
-    if (selectedItem) {
-      return (
-        <ProductDetails
-          item={selectedItem}
-          cartCount={cartItems.length}
-          cartMessage={cartMessage}
-          onBack={() => setSelectedItem(null)}
-          onAddToCart={() => handleProductAction('cart', selectedItem)}
-          onBuyNow={() => handleProductAction('buy', selectedItem)}
-          onOpenCart={() => setCustomerView('cart')}
-          onSignIn={() => setShowAuth(true)}
-          customerName={customerName}
-          greeting={greeting}
-          onLogout={handleLogout}
-        />
-      );
-    }
+  const handleAuthBack = () => {
+    setShowAuth(false);
+    setCustomerView('home');
+    setSelectedItem(null);
+    setPendingAction(null);
+    setCartOpen(false);
+  };
 
+  if (showAuth) {
     return (
-      <Homepage
-        items={catalogItems}
-        loading={catalogLoading}
-        error={catalogError}
-        cartCount={cartItems.length}
-        greeting={greeting}
-        customerName={customerName}
-        onProductClick={(item) => {
-          setSelectedItem(item);
-          setCustomerView('product');
-        }}
-        onSignIn={() => setShowAuth(true)}
-        onLogout={handleLogout}
-        onOpenCart={() => setCustomerView('cart')}
-      />
+      <main className="customer-auth">
+        <section className="auth-card">
+          <button type="button" className="back-button" onClick={handleAuthBack}>← Back to products</button>
+          <p className="eyebrow">SWIFT CART / CUSTOMER</p>
+          <h1>{isLogin ? 'Welcome back' : 'Join the community'}</h1>
+          <p className="intro">{isLogin ? 'Sign in to pick up where you left off.' : 'Create an account and make every order count.'}</p>
+          <div className="tabs">
+            <button className={`tab ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>Login</button>
+            <button className={`tab ${!isLogin ? 'active' : ''}`} onClick={() => setIsLogin(false)}>Register</button>
+          </div>
+          <form onSubmit={handleSubmit} className="auth-form">
+            {!isLogin && <>
+              <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required className="field" />
+              <input type="tel" inputMode="tel" name="phone_number" placeholder="10-Digit Phone Number" value={formData.phone_number} onChange={handleChange} required className="field" />
+              <select name="gender" value={formData.gender} onChange={handleChange} className="field"><option value="male">Male</option><option value="female">Female</option><option value="others">Others</option></select>
+              <input type="date" name="dob" value={formData.dob} onChange={handleChange} required className="field" />
+            </>}
+            <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required className="field" />
+            <input type="password" name="password" placeholder="Password (e.g. Password@123)" value={formData.password} onChange={handleChange} required className="field" />
+            {message.text && <p className={`form-message ${message.type}`}>{message.text}</p>}
+            <button type="submit" disabled={loading} className="primary-button">{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}</button>
+          </form>
+        </section>
+      </main>
     );
   }
 
   if (customerView === 'payment') {
-    return <Payment items={selectedItem ? [{ ...selectedItem, quantity: 1 }] : cartItems} onBack={() => setCustomerView(selectedItem ? 'product' : 'cart')} onComplete={() => setCustomerView('home')} />;
-  }
-
-  if (customerView === 'cart') {
-    return <Cart items={cartItems} onBack={() => setCustomerView('home')} onIncrease={increaseCartItem} onDecrease={decreaseCartItem} onCheckout={(items) => { setSelectedItem(null); setCartItems(items); setCustomerView('payment'); }} />;
+    return <Payment items={selectedItem ? [{ ...selectedItem, quantity: 1 }] : cartItems} onBack={() => setCustomerView(selectedItem ? 'product' : 'home')} onComplete={() => setCustomerView('home')} />;
   }
 
   if (customerView === 'product' && selectedItem) {
@@ -173,19 +173,60 @@ export default function App() {
         onBack={() => setCustomerView('home')}
         onAddToCart={() => handleProductAction('cart', selectedItem)}
         onBuyNow={() => handleProductAction('buy', selectedItem)}
-        onOpenCart={() => setCustomerView('cart')}
+        onOpenCart={() => setCartOpen(true)}
         onSignIn={() => setShowAuth(true)}
         customerName={customerName}
         greeting={greeting}
         onLogout={handleLogout}
+        cartItems={cartItems}
+        cartOpen={cartOpen}
+        onCloseCart={() => setCartOpen(false)}
+        onIncreaseCartItem={increaseCartItem}
+        onDecreaseCartItem={decreaseCartItem}
+        onCheckoutCart={(items) => {
+          setSelectedItem(null);
+          setCartItems(items);
+          setCartOpen(false);
+          setCustomerView('payment');
+        }}
       />
     );
   }
+
+  return (
+    <Homepage
+      items={catalogItems}
+      loading={catalogLoading}
+      error={catalogError}
+      cartCount={cartItems.length}
+      greeting={greeting}
+      customerName={customerName}
+      onProductClick={(item) => {
+        setSelectedItem(item);
+        setCustomerView('product');
+      }}
+      onSignIn={() => setShowAuth(true)}
+      onLogout={handleLogout}
+      onOpenCart={() => setCartOpen(true)}
+      cartItems={cartItems}
+      cartOpen={cartOpen}
+      onCloseCart={() => setCartOpen(false)}
+      onIncreaseCartItem={increaseCartItem}
+      onDecreaseCartItem={decreaseCartItem}
+      onCheckoutCart={(items) => {
+        setSelectedItem(null);
+        setCartItems(items);
+        setCartOpen(false);
+        setCustomerView('payment');
+      }}
+    />
+  );
 
   function handleProductAction(action, item) {
     if (!customerName) {
       setPendingAction(action);
       setSelectedItem(item);
+      setCustomerView('product');
       setShowAuth(true);
       return;
     }
@@ -197,7 +238,7 @@ export default function App() {
     }
 
     addItemToCart(item);
-    setCustomerView('cart');
+    setCartOpen(true);
   }
 
   function addItemToCart(item) {
@@ -225,35 +266,9 @@ export default function App() {
     setCartItems(nextCart);
   }
 
-  return (
-    <main className="customer-auth">
-      <section className="auth-card">
-        <button type="button" className="back-button" onClick={() => setShowAuth(false)}>← Back to welcome</button>
-        <p className="eyebrow">SWIFT CART / CUSTOMER</p>
-        <h1>{isLogin ? 'Welcome back' : 'Join the community'}</h1>
-        <p className="intro">{isLogin ? 'Sign in to pick up where you left off.' : 'Create an account and make every order count.'}</p>
-        <div className="tabs">
-          <button className={`tab ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>Login</button>
-          <button className={`tab ${!isLogin ? 'active' : ''}`} onClick={() => setIsLogin(false)}>Register</button>
-        </div>
-        <form onSubmit={handleSubmit} className="auth-form">
-          {!isLogin && <>
-            <input type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required className="field" />
-            <input type="tel" inputMode="tel" name="phone_number" placeholder="10-Digit Phone Number" value={formData.phone_number} onChange={handleChange} required className="field" />
-            <select name="gender" value={formData.gender} onChange={handleChange} className="field"><option value="male">Male</option><option value="female">Female</option><option value="others">Others</option></select>
-            <input type="date" name="dob" value={formData.dob} onChange={handleChange} required className="field" />
-          </>}
-          <input type="email" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required className="field" />
-          <input type="password" name="password" placeholder="Password (e.g. Password@123)" value={formData.password} onChange={handleChange} required className="field" />
-          {message.text && <p className={`form-message ${message.type}`}>{message.text}</p>}
-          <button type="submit" disabled={loading} className="primary-button">{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Account'}</button>
-        </form>
-      </section>
-    </main>
-  );
 }
 
-function ProductDetails({ item, cartCount, cartMessage, onBack, onAddToCart, onBuyNow, onOpenCart, onSignIn, customerName, greeting, onLogout }) {
+function ProductDetails({ item, cartCount, cartMessage, onBack, onAddToCart, onBuyNow, onOpenCart, onSignIn, customerName, greeting, onLogout, cartItems, cartOpen, onCloseCart, onIncreaseCartItem, onDecreaseCartItem, onCheckoutCart }) {
   const retailer = item.sold_by || {};
   const currentPrice = item.offer ? item.offer_price : item.price;
 
@@ -298,6 +313,15 @@ function ProductDetails({ item, cartCount, cartMessage, onBack, onAddToCart, onB
           {item.metadata?.length > 0 && <div className="product-tags">{item.metadata.map((tag) => <span key={tag}>{tag}</span>)}</div>}
         </div>
       </section>
+      <Cart
+        items={cartItems}
+        open={cartOpen}
+        onOpen={onOpenCart}
+        onClose={onCloseCart}
+        onIncrease={onIncreaseCartItem}
+        onDecrease={onDecreaseCartItem}
+        onCheckout={onCheckoutCart}
+      />
     </main>
   );
 }

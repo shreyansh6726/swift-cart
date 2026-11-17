@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Cart from '../components/cart';
 import Navbar from '../components/navbar';
 import Searchbar from '../components/searchbar';
 
@@ -12,7 +13,13 @@ export default function Homepage({
   onProductClick,
   onSignIn,
   onLogout,
-  onOpenCart
+  onOpenCart,
+  cartItems,
+  cartOpen,
+  onCloseCart,
+  onIncreaseCartItem,
+  onDecreaseCartItem,
+  onCheckoutCart
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const filteredItems = useMemo(() => {
@@ -66,6 +73,15 @@ export default function Homepage({
           ))}
         </div>
       </section>
+      <Cart
+        items={cartItems}
+        open={cartOpen}
+        onOpen={onOpenCart}
+        onClose={onCloseCart}
+        onIncrease={onIncreaseCartItem}
+        onDecrease={onDecreaseCartItem}
+        onCheckout={onCheckoutCart}
+      />
     </main>
   );
 }

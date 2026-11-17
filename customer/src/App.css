@@ -42,6 +42,21 @@ button, input, select { font: inherit; }
 .catalog-status { color: var(--muted); text-align: center; }
 .catalog-error { color: #c53b50; }
 .catalog-item { cursor: pointer; }
+.cart-drawer { background: white; border-left: 1px solid #dcd9ff; box-shadow: -16px 0 42px rgba(69,55,184,.16); height: 100vh; position: fixed; right: 0; top: 0; transform: translateX(calc(100% - 48px)); transition: transform .25s ease; width: min(390px, 92vw); z-index: 20; }
+.cart-drawer.open { transform: translateX(0); }
+.cart-drawer-tab { align-items: center; background: var(--deep); border: 0; border-radius: 12px 0 0 12px; color: white; cursor: pointer; display: flex; flex-direction: column; gap: 8px; height: 118px; justify-content: center; left: -1px; position: absolute; top: 42%; transform: translateX(-100%); width: 48px; }
+.cart-drawer-tab span { font-size: 11px; font-weight: 700; letter-spacing: .5px; writing-mode: vertical-rl; }
+.cart-drawer-tab strong { background: #e8e6ff; border-radius: 99px; color: var(--deep); font-size: 11px; min-width: 20px; padding: 3px; }
+.cart-drawer-content { display: flex; flex-direction: column; height: 100%; overflow-y: auto; padding: 30px 24px; }
+.cart-drawer-header { align-items: flex-start; display: flex; justify-content: space-between; }
+.cart-drawer-header .eyebrow { margin-bottom: 8px; }
+.cart-drawer-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 30px; letter-spacing: -1px; margin: 0; }
+.cart-close-button { background: #e8e6ff; border: 0; border-radius: 8px; color: var(--deep); cursor: pointer; font-size: 24px; height: 34px; line-height: 1; width: 34px; }
+.cart-drawer .cart-items { flex: 1; margin-top: 24px; }
+.cart-drawer .cart-item { grid-template-columns: 48px minmax(0, 1fr); }
+.cart-drawer .cart-item-image { height: 48px; width: 48px; }
+.cart-drawer .quantity-control { grid-column: 2; justify-self: start; }
+.cart-drawer .payment-button { margin-bottom: 0; }
 .product-page { background: var(--wash); color: var(--ink); min-height: 100vh; padding: 22px clamp(20px, 6vw, 88px) 34px; }
 .product-page .customer-navbar { max-width: 1180px; }
 .product-header { align-items: center; display: flex; justify-content: space-between; margin: 0 auto 34px; max-width: 1180px; }

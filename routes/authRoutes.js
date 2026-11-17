@@ -7,20 +7,8 @@ const verifyToken = require('../middleware/authMiddleware');
 router.post('/register', authController.register);
 router.post('/login', authController.login);
 
-// Protected Route Example
-router.get('/profile', verifyToken, async (req, res) => {
-   try {
-      const UserModel = req.clientApp === 'admin'
-         ? require('../models/admin/admin')
-         : req.clientApp === 'retailer'
-            ? require('../models/retailer/retailer')
-            : require('../models/user/user');
-      const User = req.db.model(UserModel.modelName, UserModel.schema);
-      const user = await User.findById(req.user.userId).select('-__v');
-      res.status(200).json({ success: true, user });
-   } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-   }
-});
+router.get('/profile', verifyToken, authController.getProfile);
+router.put('/profile', verifyToken, authController.updateProfile);
+router.delete('/profile', verifyToken, authController.deleteProfile);
 
 module.exports = router;

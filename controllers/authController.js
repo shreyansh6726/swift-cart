@@ -100,3 +100,87 @@ exports.login = async (req, res) => {
       res.status(500).json({ success: false, error: error.message });
    }
 };
+
+// 3. READ PROFILE
+exports.getProfile = async (req, res) => {
+   try {
+      const { User } = getModels(req.db, req.clientApp);
+      const user = await User.findById(req.user.userId).select('-__v');
+
+      if (!user) {
+         return res.status(404).json({ success: false, message: 'Profile not found' });
+      }
+
+      res.status(200).json({ success: true, user });
+   } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+   }
+};
+
+// 4. UPDATE PROFILE
+exports.updateProfile = async (req, res) => {
+   try {
+      if (Object.prototype.hasOwnProperty.call(req.body, 'email') ||
+         Object.prototype.hasOwnProperty.call(req.body, 'phone_number')) {
+         return res.status(400).json({
+            success: false,
+            message: 'Email and phone number cannot be modified'
+         });
+      }
+
+      const { User, UserCredential } = getModels(req.db, req.clientApp);
+      const editableFields = req.clientApp === 'retailer'
+         ? ['name', 'gender', 'dob', 'shop_name', 'shop_address']
+         : req.clientApp === 'admin'
+            ? ['name']
+            : ['name', 'gender', 'dob'];
+      const updates = {};
+
+      for (const field of editableFields) {
+         if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+            updates[field] = req.body[field];
+         }
+      }
+
+      const user = await User.findByIdAndUpdate(
+         req.user.userId,
+         { $set: updates },
+         { new: true, runValidators: true }
+      ).select('-__v');
+
+      if (!user) {
+         return res.status(404).json({ success: false, message: 'Profile not found' });
+      }
+
+      if (typeof req.body.password === 'string' && req.body.password.length > 0) {
+         const credential = await UserCredential.findOne({ user_id: req.user.userId });
+         if (!credential) {
+            return res.status(404).json({ success: false, message: 'Account credentials not found' });
+         }
+
+         credential.password = await bcrypt.hash(req.body.password, await bcrypt.genSalt(10));
+         await credential.save();
+      }
+
+      res.status(200).json({ success: true, message: 'Profile updated successfully', user });
+   } catch (error) {
+      res.status(400).json({ success: false, error: error.message });
+   }
+};
+
+// 5. DELETE PROFILE
+exports.deleteProfile = async (req, res) => {
+   try {
+      const { User, UserCredential } = getModels(req.db, req.clientApp);
+      const user = await User.findByIdAndDelete(req.user.userId);
+
+      if (!user) {
+         return res.status(404).json({ success: false, message: 'Profile not found' });
+      }
+
+      await UserCredential.deleteOne({ user_id: req.user.userId });
+      res.status(200).json({ success: true, message: 'Profile deleted successfully' });
+   } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+   }
+};

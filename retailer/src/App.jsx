@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 
 const API_BASE_URL = import.meta.env.API_BASE_URL;
@@ -16,6 +16,14 @@ export default function App() {
   const [loggedIn, setLoggedIn] = useState(Boolean(localStorage.getItem('retailerToken')));
   const [showAuth, setShowAuth] = useState(Boolean(localStorage.getItem('retailerToken')));
   const [retailerName, setRetailerName] = useState(localStorage.getItem('retailerName') || 'Retailer');
+  const [greeting, setGreeting] = useState(getGreeting());
+
+  useEffect(() => {
+    const updateGreeting = () => setGreeting(getGreeting());
+    const interval = setInterval(updateGreeting, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChange = (event) => setFormData({ ...formData, [event.target.name]: event.target.value });
 
@@ -79,7 +87,7 @@ export default function App() {
           <p className="eyebrow">SWIFT CART RETAILER</p>
           <div className="home-icon" aria-hidden="true">✦</div>
           <p className="home-kicker">Your storefront is ready</p>
-          <h1>Welcome back, {retailerName}.</h1>
+          <h1>{greeting}, {retailerName}.</h1>
           <p className="home-copy">Manage your retail journey from one simple, focused space.</p>
           <button
             type="button"
@@ -153,4 +161,13 @@ function LandingPage({ onGetStarted }) {
 
 function Shell({ children }) {
   return <main className="auth-page"><section className="auth-card">{children}</section></main>;
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour >= 3 && hour < 12) return 'Good Morning';
+  if (hour >= 12 && hour < 16) return 'Good afternoon';
+  if (hour >= 16 && hour < 20) return 'Good evening';
+  return 'Hello';
 }

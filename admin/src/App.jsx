@@ -1,24 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import './App.css';
 
 const API_BASE_URL = import.meta.env.API_BASE_URL;
 
-const emptyForm = {
-  name: '',
-  email: '',
-  phone_number: '',
-  password: ''
-};
+const emptyForm = { name: '', email: '', phone_number: '', password: '' };
 
 export default function App() {
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState(emptyForm);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(Boolean(localStorage.getItem('adminToken')));
+  const [adminName, setAdminName] = useState(localStorage.getItem('adminName') || '');
+  const [showAuth, setShowAuth] = useState(Boolean(localStorage.getItem('adminToken')));
+  const [greeting, setGreeting] = useState(getGreeting());
 
-  const handleChange = (event) => {
-    setFormData({ ...formData, [event.target.name]: event.target.value });
-  };
+  useEffect(() => {
+    const interval = setInterval(() => setGreeting(getGreeting()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleChange = (event) => setFormData({ ...formData, [event.target.name]: event.target.value });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,17 +35,12 @@ export default function App() {
     }
 
     const endpoint = isLogin ? '/login' : '/register';
-    const payload = isLogin
-      ? { email: formData.email, password: formData.password }
-      : { ...formData, phone_number: Number(normalizedPhone) };
+    const payload = isLogin ? { email: formData.email, password: formData.password } : { ...formData, phone_number: Number(normalizedPhone) };
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Frontend-Path': window.location.pathname
-        },
+        headers: { 'Content-Type': 'application/json', 'X-Frontend-Path': window.location.pathname },
         body: JSON.stringify(payload)
       });
       const data = await response.json();
@@ -52,7 +48,9 @@ export default function App() {
 
       if (isLogin) {
         localStorage.setItem('adminToken', data.token);
-        setLoggedIn(true);
+        localStorage.setItem('adminName', data.user.name);
+        setAdminName(data.user.name);
+        setShowAuth(true);
         setMessage({ type: 'success', text: 'Login successful.' });
       } else {
         setIsLogin(true);
@@ -65,41 +63,83 @@ export default function App() {
     }
   };
 
-  if (loggedIn) {
-    return <Shell><h1>Admin Dashboard</h1><p>You are logged in.</p><button onClick={() => { localStorage.removeItem('adminToken'); setLoggedIn(false); }} style={styles.button}>Logout</button></Shell>;
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminName');
+    setAdminName('');
+    setShowAuth(false);
+  };
+
+  if (!showAuth && !adminName) {
+    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+  }
+
+  if (adminName) {
+    return (
+      <main className="admin-home">
+        <div className="home-grid" />
+        <div className="home-glow" />
+        <section className="home-card">
+          <div className="home-icon" aria-hidden="true">◆</div>
+          <p className="eyebrow">SWIFT CART / ADMIN</p>
+          <h1>{greeting}, {adminName}.</h1>
+          <p className="home-copy">Your command centre is ready. Keep the marketplace moving.</p>
+          <button type="button" className="primary-button" onClick={handleLogout}>Log out</button>
+        </section>
+      </main>
+    );
   }
 
   return (
-    <Shell>
-      <div style={styles.tabs}>
-        <button onClick={() => setIsLogin(true)} style={styles.tab}>{isLogin ? '• ' : ''}Login</button>
-        <button onClick={() => setIsLogin(false)} style={styles.tab}>{!isLogin ? '• ' : ''}Register</button>
-      </div>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        {!isLogin && <>
-          <input name="name" placeholder="Admin Name" value={formData.name} onChange={handleChange} required style={styles.input} />
-          <input name="phone_number" type="tel" inputMode="tel" placeholder="Phone Number" value={formData.phone_number} onChange={handleChange} required style={styles.input} />
-        </>}
-        <input name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required style={styles.input} />
-        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required style={styles.input} />
-        {message.text && <p style={{ color: message.type === 'error' ? '#ef4444' : '#22c55e' }}>{message.text}</p>}
-        <button type="submit" disabled={loading} style={styles.button}>{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Admin'}</button>
-      </form>
-    </Shell>
+    <main className="admin-auth">
+      <section className="auth-card">
+        <button type="button" className="back-button" onClick={() => setShowAuth(false)}>← Back to welcome</button>
+        <p className="eyebrow">SWIFT CART / ADMIN</p>
+        <h1>{isLogin ? 'Welcome back' : 'Create admin access'}</h1>
+        <p className="intro">{isLogin ? 'Sign in to your command centre.' : 'Set up a secure administrator account.'}</p>
+        <div className="tabs">
+          <button className={`tab ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>Login</button>
+          <button className={`tab ${!isLogin ? 'active' : ''}`} onClick={() => setIsLogin(false)}>Register</button>
+        </div>
+        <form onSubmit={handleSubmit} className="auth-form">
+          {!isLogin && <>
+            <input name="name" placeholder="Admin Name" value={formData.name} onChange={handleChange} required className="field" />
+            <input name="phone_number" type="tel" inputMode="tel" placeholder="Phone Number" value={formData.phone_number} onChange={handleChange} required className="field" />
+          </>}
+          <input name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required className="field" />
+          <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required className="field" />
+          {message.text && <p className={`form-message ${message.type}`}>{message.text}</p>}
+          <button type="submit" disabled={loading} className="primary-button">{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Admin'}</button>
+        </form>
+      </section>
+    </main>
   );
 }
 
-function Shell({ children }) {
-  return <main style={styles.page}><section style={styles.card}><p style={styles.label}>SWIFT CART ADMIN</p>{children}</section></main>;
+function LandingPage({ onGetStarted }) {
+  return (
+    <main className="admin-landing">
+      <div className="admin-grid" />
+      <div className="gold-orb orb-one" />
+      <div className="gold-orb orb-two" />
+      <section className="landing-content">
+        <div className="brand-mark" aria-hidden="true">◆</div>
+        <p className="eyebrow">SWIFT CART / ADMIN</p>
+        <h1>Lead with <span>clarity.</span></h1>
+        <p className="landing-copy">One intelligent space to keep your marketplace secure, healthy, and moving forward.</p>
+        <button type="button" className="primary-button landing-button" onClick={onGetStarted}>Get started <span aria-hidden="true">↗</span></button>
+        <p className="landing-note">Control, without the clutter.</p>
+      </section>
+      <div className="floating-chip chip-one">SYSTEM ONLINE</div>
+      <div className="floating-chip chip-two">SECURE ACCESS</div>
+    </main>
+  );
 }
 
-const styles = {
-  page: { minHeight: '100vh', display: 'grid', placeItems: 'center', background: '#111827', fontFamily: 'Arial, sans-serif' },
-  card: { width: '380px', padding: '32px', borderRadius: '16px', background: '#1f2937', color: '#f9fafb', boxShadow: '0 20px 50px rgba(0,0,0,.3)' },
-  label: { color: '#93c5fd', fontSize: '12px', fontWeight: '700', letterSpacing: '2px' },
-  tabs: { display: 'flex', gap: '12px', margin: '24px 0' },
-  tab: { padding: '10px 0', background: 'none', border: 0, color: '#bfdbfe', cursor: 'pointer', fontWeight: '700' },
-  form: { display: 'flex', flexDirection: 'column', gap: '14px' },
-  input: { padding: '12px', borderRadius: '7px', border: '1px solid #4b5563', fontSize: '14px' },
-  button: { padding: '12px', border: 0, borderRadius: '7px', background: '#2563eb', color: '#fff', fontWeight: '700', cursor: 'pointer' }
-};
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour >= 3 && hour < 12) return 'Good Morning';
+  if (hour >= 12 && hour < 16) return 'Good afternoon';
+  if (hour >= 16 && hour < 20) return 'Good evening';
+  return 'Hello';
+}

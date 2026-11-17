@@ -75,6 +75,7 @@ button, input, select { font: inherit; }
 .product-stock { color: #278c71; font-size: 13px; font-weight: 700; }
 .product-actions { display: flex; gap: 12px; margin: 24px 0 10px; }
 .product-action-message { color: #278c71; font-size: 13px; font-weight: 600; }
+.wishlist-confirmation { background: #e8f8f1; border: 1px solid #a9dfca; border-radius: 9px; box-shadow: 0 14px 30px rgba(25,115,84,.16); color: #197354; font-size: 13px; font-weight: 600; margin: 12px 0 0; padding: 10px 12px; position: fixed; right: 24px; top: 24px; z-index: 30; }
 .retailer-details { border-top: 1px solid #e6e3ff; margin-top: 30px; padding-top: 22px; }
 .retailer-details .eyebrow { margin-bottom: 10px; }
 .retailer-details h2 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; margin: 0 0 8px; }

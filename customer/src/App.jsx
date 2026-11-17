@@ -25,6 +25,7 @@ export default function App() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [cartItems, setCartItems] = useState(readCart);
   const [cartMessage, setCartMessage] = useState('');
+  const [wishlistMessage, setWishlistMessage] = useState('');
   const [customerView, setCustomerView] = useState('home');
   const [pendingAction, setPendingAction] = useState(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -50,6 +51,39 @@ export default function App() {
 
     loadCatalog();
   }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token || catalogItems.length === 0) return;
+
+    const loadCart = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/cart`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-Frontend-Path': window.location.pathname
+          }
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || data.error || 'Unable to load cart');
+
+        const serverItemIds = data.cart.item_ids || [];
+        const serverQuantities = data.cart.quantities || [];
+        const nextCart = catalogItems
+          .map((item) => {
+            const itemIndex = serverItemIds.findIndex((itemId) => itemId.toString() === item._id.toString());
+            return itemIndex === -1 ? null : { ...item, quantity: serverQuantities[itemIndex] || 1 };
+          })
+          .filter(Boolean);
+        localStorage.setItem('customerCart', JSON.stringify(nextCart));
+        setCartItems(nextCart);
+      } catch (error) {
+        setCartMessage(error.message);
+      }
+    };
+
+    loadCart();
+  }, [catalogItems, customerName]);
 
   const handleChange = (event) => setFormData({ ...formData, [event.target.name]: event.target.value });
 
@@ -85,6 +119,7 @@ export default function App() {
 
       if (isLogin) {
         localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.user.id);
         localStorage.setItem('userName', data.user.name);
         setCustomerName(data.user.name);
         setShowAuth(false);
@@ -94,6 +129,9 @@ export default function App() {
           addItemToCart(selectedItem);
           setCustomerView('product');
           setCartOpen(true);
+        } else if (pendingAction === 'wishlist' && selectedItem) {
+          addItemToWishlist(selectedItem);
+          setCustomerView('product');
         } else if (selectedItem && customerView === 'product') {
           setCustomerView('product');
         } else {
@@ -114,6 +152,7 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userId');
     localStorage.removeItem('userName');
     setCustomerName('');
     setShowAuth(false);
@@ -170,8 +209,10 @@ export default function App() {
         item={selectedItem}
         cartCount={cartItems.length}
         cartMessage={cartMessage}
+        wishlistMessage={wishlistMessage}
         onBack={() => setCustomerView('home')}
         onAddToCart={() => handleProductAction('cart', selectedItem)}
+        onAddToWishlist={() => handleProductAction('wishlist', selectedItem)}
         onBuyNow={() => handleProductAction('buy', selectedItem)}
         onOpenCart={() => setCartOpen(true)}
         onSignIn={() => setShowAuth(true)}
@@ -237,6 +278,11 @@ export default function App() {
       return;
     }
 
+    if (action === 'wishlist') {
+      addItemToWishlist(item);
+      return;
+    }
+
     addItemToCart(item);
     setCartOpen(true);
   }
@@ -247,14 +293,41 @@ export default function App() {
     const nextCart = existingItem
       ? currentCart.map((cartItem) => cartItem._id === item._id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem)
       : [...currentCart, { ...item, quantity: 1 }];
-    localStorage.setItem('customerCart', JSON.stringify(nextCart));
+    saveCart(nextCart);
     setCartItems(nextCart);
     setCartMessage(existingItem ? 'Another item added to your cart.' : 'Item added to your cart.');
   }
 
+  async function addItemToWishlist(item) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setShowAuth(true);
+      setPendingAction('wishlist');
+      setSelectedItem(item);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/wishlist`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'X-Frontend-Path': window.location.pathname
+        },
+        body: JSON.stringify({ item_id: item._id })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || data.error || 'Unable to add item to wishlist');
+      setWishlistMessage(data.message || 'Item added to wishlist.');
+    } catch (error) {
+      setWishlistMessage(error.message);
+    }
+  }
+
   function increaseCartItem(itemId) {
     const nextCart = cartItems.map((item) => item._id === itemId ? { ...item, quantity: item.quantity + 1 } : item);
-    localStorage.setItem('customerCart', JSON.stringify(nextCart));
+    saveCart(nextCart);
     setCartItems(nextCart);
   }
 
@@ -262,13 +335,38 @@ export default function App() {
     const nextCart = cartItems
       .map((item) => item._id === itemId ? { ...item, quantity: item.quantity - 1 } : item)
       .filter((item) => item.quantity > 0);
-    localStorage.setItem('customerCart', JSON.stringify(nextCart));
+    saveCart(nextCart);
     setCartItems(nextCart);
+  }
+
+  async function saveCart(nextCart) {
+    localStorage.setItem('customerCart', JSON.stringify(nextCart));
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cart`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          'X-Frontend-Path': window.location.pathname
+        },
+        body: JSON.stringify({
+          item_ids: nextCart.map((item) => item._id),
+          quantities: nextCart.map((item) => item.quantity)
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || data.error || 'Unable to save cart');
+    } catch (error) {
+      setCartMessage(error.message);
+    }
   }
 
 }
 
-function ProductDetails({ item, cartCount, cartMessage, onBack, onAddToCart, onBuyNow, onOpenCart, onSignIn, customerName, greeting, onLogout, cartItems, cartOpen, onCloseCart, onIncreaseCartItem, onDecreaseCartItem, onCheckoutCart }) {
+function ProductDetails({ item, cartCount, cartMessage, wishlistMessage, onBack, onAddToCart, onAddToWishlist, onBuyNow, onOpenCart, onSignIn, customerName, greeting, onLogout, cartItems, cartOpen, onCloseCart, onIncreaseCartItem, onDecreaseCartItem, onCheckoutCart }) {
   const retailer = item.sold_by || {};
   const currentPrice = item.offer ? item.offer_price : item.price;
 
@@ -299,9 +397,11 @@ function ProductDetails({ item, cartCount, cartMessage, onBack, onAddToCart, onB
           <p className="product-stock">{item.stock_quantity > 0 ? `${item.stock_quantity} available` : 'Currently out of stock'}</p>
           <div className="product-actions">
             <button type="button" className="secondary-button" onClick={onAddToCart} disabled={item.stock_quantity < 1}>Add to cart</button>
+            <button type="button" className="secondary-button wishlist-button" onClick={onAddToWishlist}>♡ Add to wishlist</button>
             <button type="button" className="primary-button" onClick={onBuyNow} disabled={item.stock_quantity < 1}>Buy now</button>
           </div>
           {cartMessage && <p className="product-action-message">{cartMessage}</p>}
+          {wishlistMessage && <p className="wishlist-confirmation" role="status">{wishlistMessage}</p>}
           <div className="retailer-details">
             <p className="eyebrow">SOLD BY</p>
             <h2>{retailer.shop_name || retailer.name || 'Swift Cart retailer'}</h2>

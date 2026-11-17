@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import './App.css';
+import Account from './pages/account';
+import Help from './pages/help';
+import Homepage from './pages/homepage';
+import ManageProduct from './pages/manageProduct';
+import Profile from './pages/profile';
 
 const API_BASE_URL = import.meta.env.API_BASE_URL;
 
@@ -17,6 +22,8 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(Boolean(localStorage.getItem('retailerToken')));
   const [retailerName, setRetailerName] = useState(localStorage.getItem('retailerName') || 'Retailer');
   const [greeting, setGreeting] = useState(getGreeting());
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activePage, setActivePage] = useState('homepage');
 
   useEffect(() => {
     const updateGreeting = () => setGreeting(getGreeting());
@@ -79,30 +86,32 @@ export default function App() {
   }
 
   if (loggedIn) {
+    const handleLogout = () => {
+      localStorage.removeItem('retailerToken');
+      localStorage.removeItem('retailerName');
+      setLoggedIn(false);
+      setShowAuth(false);
+    };
+    const pageProps = {
+      open: sidebarOpen,
+      onToggle: () => setSidebarOpen((isOpen) => !isOpen),
+      onNavigate: setActivePage,
+      onProfileUpdated: setRetailerName,
+      onDeleted: handleLogout
+    };
+
+    if (activePage === 'account') return <Account {...pageProps} />;
+    if (activePage === 'manageProduct') return <ManageProduct {...pageProps} />;
+    if (activePage === 'help') return <Help {...pageProps} />;
+    if (activePage === 'profile') return <Profile {...pageProps} retailerName={retailerName} />;
+
     return (
-      <main className="home-page">
-        <div className="home-glow home-glow-one" />
-        <div className="home-glow home-glow-two" />
-        <section className="home-card">
-          <p className="eyebrow">SWIFT CART RETAILER</p>
-          <div className="home-icon" aria-hidden="true">✦</div>
-          <p className="home-kicker">Your storefront is ready</p>
-          <h1>{greeting}, {retailerName}.</h1>
-          <p className="home-copy">Manage your retail journey from one simple, focused space.</p>
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() => {
-              localStorage.removeItem('retailerToken');
-              localStorage.removeItem('retailerName');
-              setLoggedIn(false);
-              setShowAuth(false);
-            }}
-          >
-            Log out
-          </button>
-        </section>
-      </main>
+      <Homepage
+        {...pageProps}
+        greeting={greeting}
+        retailerName={retailerName}
+        onLogout={handleLogout}
+      />
     );
   }
 

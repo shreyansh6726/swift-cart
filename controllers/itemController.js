@@ -1,4 +1,5 @@
 const Item = require('../models/items/item');
+const Retailer = require('../models/retailer/retailer');
 
 function getItemModel(connection) {
    return connection.models.Item || connection.model(Item.modelName, Item.schema);
@@ -7,7 +8,10 @@ function getItemModel(connection) {
 exports.listCatalogItems = async (req, res) => {
    try {
       const ItemModel = getItemModel(req.db);
-      const items = await ItemModel.find().sort({ created_at: -1 });
+      const RetailerModel = req.db.models.Retailer || req.db.model(Retailer.modelName, Retailer.schema);
+      const items = await ItemModel.find()
+         .populate({ path: 'sold_by', model: RetailerModel, select: 'name email phone_number shop_name shop_address' })
+         .sort({ created_at: -1 });
       res.status(200).json({ success: true, items });
    } catch (error) {
       res.status(500).json({ success: false, error: error.message });

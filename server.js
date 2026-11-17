@@ -3,6 +3,8 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/authRoutes');
+const catalogRoutes = require('./routes/catalogRoutes');
+const itemRoutes = require('./routes/itemRoutes');
 const { connectDatabases } = require('./config/databases');
 const { createDatabaseByOriginMiddleware } = require('./middleware/databaseByOrigin');
 
@@ -20,6 +22,12 @@ async function startServer() {
 
       // The browser Referer path determines which MongoDB connection is used.
       app.use('/api/auth', createDatabaseByOriginMiddleware(databases), authRoutes);
+      app.use('/api/items', createDatabaseByOriginMiddleware(databases), itemRoutes);
+      app.use('/api/catalog', (req, res, next) => {
+         req.db = databases.retailer;
+         req.clientApp = 'catalog';
+         next();
+      }, catalogRoutes);
 
       app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
    } catch (error) {

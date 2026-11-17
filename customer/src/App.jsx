@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 import './App.css';
+import Cart from './pages/Cart';
+import Homepage from './pages/homepage';
+import Payment from './pages/Payment';
+import Navbar from './components/navbar';
 
 const API_BASE_URL = import.meta.env.API_BASE_URL;
 
@@ -18,6 +22,11 @@ export default function App() {
   const [catalogItems, setCatalogItems] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [cartItems, setCartItems] = useState(readCart);
+  const [cartMessage, setCartMessage] = useState('');
+  const [customerView, setCustomerView] = useState('home');
+  const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
     const interval = setInterval(() => setGreeting(getGreeting()), 60000);
@@ -78,6 +87,17 @@ export default function App() {
         localStorage.setItem('userName', data.user.name);
         setCustomerName(data.user.name);
         setShowAuth(true);
+        if (pendingAction === 'buy' && selectedItem) {
+          setCustomerView('payment');
+        } else if (pendingAction === 'cart' && selectedItem) {
+          addItemToCart(selectedItem);
+          setCustomerView('cart');
+        } else if (selectedItem && customerView === 'product') {
+          setCustomerView('product');
+        } else {
+          setCustomerView('home');
+        }
+        setPendingAction(null);
         setMessage({ type: 'success', text: 'Login successful.' });
       } else {
         setIsLogin(true);
@@ -95,26 +115,114 @@ export default function App() {
     localStorage.removeItem('userName');
     setCustomerName('');
     setShowAuth(false);
+    setCustomerView('home');
   };
 
-  if (!showAuth && !customerName) {
-    return <CustomerCatalog items={catalogItems} loading={catalogLoading} error={catalogError} onSignIn={() => setShowAuth(true)} />;
+  if ((!showAuth && !customerName) || (customerName && customerView === 'home')) {
+    if (selectedItem) {
+      return (
+        <ProductDetails
+          item={selectedItem}
+          cartCount={cartItems.length}
+          cartMessage={cartMessage}
+          onBack={() => setSelectedItem(null)}
+          onAddToCart={() => handleProductAction('cart', selectedItem)}
+          onBuyNow={() => handleProductAction('buy', selectedItem)}
+          onOpenCart={() => setCustomerView('cart')}
+          onSignIn={() => setShowAuth(true)}
+          customerName={customerName}
+          greeting={greeting}
+          onLogout={handleLogout}
+        />
+      );
+    }
+
+    return (
+      <Homepage
+        items={catalogItems}
+        loading={catalogLoading}
+        error={catalogError}
+        cartCount={cartItems.length}
+        greeting={greeting}
+        customerName={customerName}
+        onProductClick={(item) => {
+          setSelectedItem(item);
+          setCustomerView('product');
+        }}
+        onSignIn={() => setShowAuth(true)}
+        onLogout={handleLogout}
+        onOpenCart={() => setCustomerView('cart')}
+      />
+    );
   }
 
-  if (customerName) {
+  if (customerView === 'payment') {
+    return <Payment items={selectedItem ? [{ ...selectedItem, quantity: 1 }] : cartItems} onBack={() => setCustomerView(selectedItem ? 'product' : 'cart')} onComplete={() => setCustomerView('home')} />;
+  }
+
+  if (customerView === 'cart') {
+    return <Cart items={cartItems} onBack={() => setCustomerView('home')} onIncrease={increaseCartItem} onDecrease={decreaseCartItem} onCheckout={(items) => { setSelectedItem(null); setCartItems(items); setCustomerView('payment'); }} />;
+  }
+
+  if (customerView === 'product' && selectedItem) {
     return (
-      <main className="customer-home">
-        <div className="home-shape shape-one" />
-        <div className="home-shape shape-two" />
-        <section className="home-card">
-          <div className="home-icon" aria-hidden="true">✦</div>
-          <p className="eyebrow">SWIFT CART / CUSTOMER</p>
-          <h1>{greeting}, {customerName}.</h1>
-          <p className="home-copy">Everything you love, now ready for your next shopping moment.</p>
-          <button type="button" className="primary-button" onClick={handleLogout}>Log out</button>
-        </section>
-      </main>
+      <ProductDetails
+        item={selectedItem}
+        cartCount={cartItems.length}
+        cartMessage={cartMessage}
+        onBack={() => setCustomerView('home')}
+        onAddToCart={() => handleProductAction('cart', selectedItem)}
+        onBuyNow={() => handleProductAction('buy', selectedItem)}
+        onOpenCart={() => setCustomerView('cart')}
+        onSignIn={() => setShowAuth(true)}
+        customerName={customerName}
+        greeting={greeting}
+        onLogout={handleLogout}
+      />
     );
+  }
+
+  function handleProductAction(action, item) {
+    if (!customerName) {
+      setPendingAction(action);
+      setSelectedItem(item);
+      setShowAuth(true);
+      return;
+    }
+
+    if (action === 'buy') {
+      setSelectedItem(item);
+      setCustomerView('payment');
+      return;
+    }
+
+    addItemToCart(item);
+    setCustomerView('cart');
+  }
+
+  function addItemToCart(item) {
+    const currentCart = readCart();
+    const existingItem = currentCart.find((cartItem) => cartItem._id === item._id);
+    const nextCart = existingItem
+      ? currentCart.map((cartItem) => cartItem._id === item._id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem)
+      : [...currentCart, { ...item, quantity: 1 }];
+    localStorage.setItem('customerCart', JSON.stringify(nextCart));
+    setCartItems(nextCart);
+    setCartMessage(existingItem ? 'Another item added to your cart.' : 'Item added to your cart.');
+  }
+
+  function increaseCartItem(itemId) {
+    const nextCart = cartItems.map((item) => item._id === itemId ? { ...item, quantity: item.quantity + 1 } : item);
+    localStorage.setItem('customerCart', JSON.stringify(nextCart));
+    setCartItems(nextCart);
+  }
+
+  function decreaseCartItem(itemId) {
+    const nextCart = cartItems
+      .map((item) => item._id === itemId ? { ...item, quantity: item.quantity - 1 } : item)
+      .filter((item) => item.quantity > 0);
+    localStorage.setItem('customerCart', JSON.stringify(nextCart));
+    setCartItems(nextCart);
   }
 
   return (
@@ -145,42 +253,61 @@ export default function App() {
   );
 }
 
-function CustomerCatalog({ items, loading, error, onSignIn }) {
+function ProductDetails({ item, cartCount, cartMessage, onBack, onAddToCart, onBuyNow, onOpenCart, onSignIn, customerName, greeting, onLogout }) {
+  const retailer = item.sold_by || {};
+  const currentPrice = item.offer ? item.offer_price : item.price;
+
   return (
-    <main className="customer-catalog">
-      <header className="catalog-header">
-        <div>
-          <p className="eyebrow">SWIFT CART / CUSTOMER</p>
-          <h1>Find your next <span>favourite.</span></h1>
-          <p>Fresh picks from our retailer community.</p>
-        </div>
-        <button type="button" className="primary-button" onClick={onSignIn}>Sign in / Register</button>
+    <main className="product-page">
+      <Navbar
+        customerName={customerName}
+        greeting={greeting}
+        cartCount={cartCount}
+        onHome={onBack}
+        onSignIn={onSignIn}
+        onLogout={onLogout}
+        onOpenCart={onOpenCart}
+      />
+      <header className="product-header">
+        <button type="button" className="back-button" onClick={onBack}>← Back to products</button>
+        <button type="button" className="cart-button" onClick={onOpenCart || onSignIn}>Cart ({cartCount})</button>
       </header>
-      <section className="catalog-content">
-        {loading && <p className="catalog-status">Loading products...</p>}
-        {!loading && error && <p className="catalog-status catalog-error">{error}</p>}
-        {!loading && !error && items.length === 0 && <p className="catalog-status">No products are available yet.</p>}
-        <div className="catalog-grid">
-          {items.map((item) => (
-            <article className="catalog-item" key={item._id}>
-              <div className="catalog-item-image">
-                {item.image_link?.[0] ? <img src={item.image_link[0]} alt={item.name} /> : <span>✦</span>}
-              </div>
-              <div className="catalog-item-body">
-                <p className="catalog-category">{item.category || 'Product'}</p>
-                <h2>{item.name}</h2>
-                <p className="catalog-description">{item.description || 'A new addition to your shopping list.'}</p>
-                <div className="catalog-item-footer">
-                  <strong>₹{item.offer ? item.offer_price : item.price}</strong>
-                  {item.offer && <span>₹{item.price}</span>}
-                </div>
-              </div>
-            </article>
-          ))}
+      <section className="product-details">
+        <div className="product-gallery">
+          {item.image_link?.length ? item.image_link.map((image, index) => <img src={image} alt={`${item.name} view ${index + 1}`} key={image} />) : <div className="product-image-placeholder">✦</div>}
+        </div>
+        <div className="product-information">
+          <p className="catalog-category">{item.category || 'Product'}</p>
+          <h1>{item.name}</h1>
+          <div className="product-price"><strong>₹{currentPrice}</strong>{item.offer && <span>₹{item.price}</span>}</div>
+          <p className="product-description">{item.description || 'A quality product from the Swift Cart retailer community.'}</p>
+          <p className="product-stock">{item.stock_quantity > 0 ? `${item.stock_quantity} available` : 'Currently out of stock'}</p>
+          <div className="product-actions">
+            <button type="button" className="secondary-button" onClick={onAddToCart} disabled={item.stock_quantity < 1}>Add to cart</button>
+            <button type="button" className="primary-button" onClick={onBuyNow} disabled={item.stock_quantity < 1}>Buy now</button>
+          </div>
+          {cartMessage && <p className="product-action-message">{cartMessage}</p>}
+          <div className="retailer-details">
+            <p className="eyebrow">SOLD BY</p>
+            <h2>{retailer.shop_name || retailer.name || 'Swift Cart retailer'}</h2>
+            <p>{retailer.name ? `Managed by ${retailer.name}` : 'Independent Swift Cart retailer'}</p>
+            {retailer.email && <p>{retailer.email}</p>}
+            {retailer.phone_number && <p>{retailer.phone_number}</p>}
+            {retailer.shop_address && <p>{retailer.shop_address}</p>}
+          </div>
+          {item.metadata?.length > 0 && <div className="product-tags">{item.metadata.map((tag) => <span key={tag}>{tag}</span>)}</div>}
         </div>
       </section>
     </main>
   );
+}
+
+function readCart() {
+  try {
+    return JSON.parse(localStorage.getItem('customerCart') || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function getGreeting() {

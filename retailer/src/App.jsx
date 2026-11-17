@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './App.css';
 
 const API_BASE_URL = import.meta.env.API_BASE_URL;
 
@@ -13,6 +14,8 @@ export default function App() {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [loading, setLoading] = useState(false);
   const [loggedIn, setLoggedIn] = useState(Boolean(localStorage.getItem('retailerToken')));
+  const [showAuth, setShowAuth] = useState(Boolean(localStorage.getItem('retailerToken')));
+  const [retailerName, setRetailerName] = useState(localStorage.getItem('retailerName') || 'Retailer');
 
   const handleChange = (event) => setFormData({ ...formData, [event.target.name]: event.target.value });
 
@@ -30,7 +33,9 @@ export default function App() {
     }
 
     const endpoint = isLogin ? '/login' : '/register';
-    const payload = isLogin ? { email: formData.email, password: formData.password } : { ...formData, phone_number: Number(normalizedPhone), dob: new Date(formData.dob) };
+    const payload = isLogin
+      ? { email: formData.email, password: formData.password }
+      : { ...formData, phone_number: Number(normalizedPhone), dob: new Date(formData.dob) };
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth${endpoint}`, {
@@ -46,6 +51,8 @@ export default function App() {
 
       if (isLogin) {
         localStorage.setItem('retailerToken', data.token);
+        localStorage.setItem('retailerName', data.user.name);
+        setRetailerName(data.user.name);
         setLoggedIn(true);
         setMessage({ type: 'success', text: 'Login successful.' });
       } else {
@@ -59,45 +66,91 @@ export default function App() {
     }
   };
 
+  if (!showAuth && !loggedIn) {
+    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+  }
+
   if (loggedIn) {
-    return <Shell><h1>Retailer Dashboard</h1><p>You are logged in.</p><button onClick={() => { localStorage.removeItem('retailerToken'); setLoggedIn(false); }} style={styles.button}>Logout</button></Shell>;
+    return (
+      <main className="home-page">
+        <div className="home-glow home-glow-one" />
+        <div className="home-glow home-glow-two" />
+        <section className="home-card">
+          <p className="eyebrow">SWIFT CART RETAILER</p>
+          <div className="home-icon" aria-hidden="true">✦</div>
+          <p className="home-kicker">Your storefront is ready</p>
+          <h1>Welcome back, {retailerName}.</h1>
+          <p className="home-copy">Manage your retail journey from one simple, focused space.</p>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => {
+              localStorage.removeItem('retailerToken');
+              localStorage.removeItem('retailerName');
+              setLoggedIn(false);
+              setShowAuth(false);
+            }}
+          >
+            Log out
+          </button>
+        </section>
+      </main>
+    );
   }
 
   return (
     <Shell>
-      <div style={styles.tabs}>
-        <button onClick={() => setIsLogin(true)} style={styles.tab}>{isLogin ? '• ' : ''}Login</button>
-        <button onClick={() => setIsLogin(false)} style={styles.tab}>{!isLogin ? '• ' : ''}Register</button>
+      <button type="button" className="back-button" onClick={() => setShowAuth(false)}>← Back to welcome</button>
+      <div className="auth-heading">
+        <p className="eyebrow">SWIFT CART RETAILER</p>
+        <h1>{isLogin ? 'Welcome back' : 'Build your storefront'}</h1>
+        <p>{isLogin ? 'Sign in to continue to your retailer home.' : 'Create your retailer account in a few steps.'}</p>
       </div>
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <div className="tabs">
+        <button className={`tab ${isLogin ? 'active' : ''}`} onClick={() => setIsLogin(true)}>{isLogin ? '• ' : ''}Login</button>
+        <button className={`tab ${!isLogin ? 'active' : ''}`} onClick={() => setIsLogin(false)}>{!isLogin ? '• ' : ''}Register</button>
+      </div>
+      <form onSubmit={handleSubmit} className="auth-form">
         {!isLogin && <>
-          <input name="name" placeholder="Owner Name" value={formData.name} onChange={handleChange} required style={styles.input} />
-          <input name="phone_number" type="tel" inputMode="tel" placeholder="Phone Number" value={formData.phone_number} onChange={handleChange} required style={styles.input} />
-          <select name="gender" value={formData.gender} onChange={handleChange} style={styles.input}><option value="male">Male</option><option value="female">Female</option><option value="others">Others</option></select>
-          <input name="dob" type="date" value={formData.dob} onChange={handleChange} required style={styles.input} />
-          <input name="shop_name" placeholder="Shop Name" value={formData.shop_name} onChange={handleChange} required style={styles.input} />
-          <textarea name="shop_address" placeholder="Shop Address" value={formData.shop_address} onChange={handleChange} required style={styles.input} />
+          <input name="name" placeholder="Owner Name" value={formData.name} onChange={handleChange} required className="field" />
+          <input name="phone_number" type="tel" inputMode="tel" placeholder="Phone Number" value={formData.phone_number} onChange={handleChange} required className="field" />
+          <select name="gender" value={formData.gender} onChange={handleChange} className="field"><option value="male">Male</option><option value="female">Female</option><option value="others">Others</option></select>
+          <input name="dob" type="date" value={formData.dob} onChange={handleChange} required className="field" />
+          <input name="shop_name" placeholder="Shop Name" value={formData.shop_name} onChange={handleChange} required className="field" />
+          <textarea name="shop_address" placeholder="Shop Address" value={formData.shop_address} onChange={handleChange} required className="field" />
         </>}
-        <input name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required style={styles.input} />
-        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required style={styles.input} />
-        {message.text && <p style={{ color: message.type === 'error' ? '#dc2626' : '#059669' }}>{message.text}</p>}
-        <button type="submit" disabled={loading} style={styles.button}>{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Retailer Account'}</button>
+        <input name="email" type="email" placeholder="Email Address" value={formData.email} onChange={handleChange} required className="field" />
+        <input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} required className="field" />
+        {message.text && <p className={`form-message ${message.type}`}>{message.text}</p>}
+        <button type="submit" disabled={loading} className="primary-button">{loading ? 'Processing...' : isLogin ? 'Sign In' : 'Create Retailer Account'}</button>
       </form>
     </Shell>
   );
 }
 
-function Shell({ children }) {
-  return <main style={styles.page}><section style={styles.card}><p style={styles.label}>SWIFT CART RETAILER</p>{children}</section></main>;
+function LandingPage({ onGetStarted }) {
+  return (
+    <main className="landing-page">
+      <div className="orb orb-one" />
+      <div className="orb orb-two" />
+      <div className="orb orb-three" />
+      <div className="grid-lines" />
+      <section className="landing-content">
+        <div className="brand-mark" aria-hidden="true">✦</div>
+        <p className="eyebrow">SWIFT CART / RETAIL</p>
+        <h1>Make your store <span>stand out.</span></h1>
+        <p className="landing-copy">A calmer, smarter way to grow your retail business and reach more customers.</p>
+        <button type="button" className="primary-button landing-button" onClick={onGetStarted}>
+          Get started <span aria-hidden="true">↗</span>
+        </button>
+        <div className="landing-note"><span className="status-dot" /> Built for ambitious retailers</div>
+      </section>
+      <div className="floating-card floating-card-one"><span>↗</span> Grow with ease</div>
+      <div className="floating-card floating-card-two">✦ <span>your store, elevated</span></div>
+    </main>
+  );
 }
 
-const styles = {
-  page: { minHeight: '100vh', display: 'grid', placeItems: 'center', background: '#ecfdf5', fontFamily: 'Arial, sans-serif' },
-  card: { width: '400px', padding: '32px', borderRadius: '16px', background: '#fff', color: '#064e3b', boxShadow: '0 20px 50px rgba(6,78,59,.15)' },
-  label: { color: '#059669', fontSize: '12px', fontWeight: '700', letterSpacing: '2px' },
-  tabs: { display: 'flex', gap: '12px', margin: '24px 0' },
-  tab: { padding: '10px 0', background: 'none', border: 0, color: '#047857', cursor: 'pointer', fontWeight: '700' },
-  form: { display: 'flex', flexDirection: 'column', gap: '12px' },
-  input: { padding: '12px', borderRadius: '7px', border: '1px solid #a7f3d0', fontSize: '14px' },
-  button: { padding: '12px', border: 0, borderRadius: '7px', background: '#059669', color: '#fff', fontWeight: '700', cursor: 'pointer' }
-};
+function Shell({ children }) {
+  return <main className="auth-page"><section className="auth-card">{children}</section></main>;
+}

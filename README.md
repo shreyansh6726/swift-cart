@@ -76,9 +76,14 @@ Authentication routes are available under `/api/auth`:
 | `POST` | `/api/auth/register` | Register a user |
 | `POST` | `/api/auth/login` | Log in and receive a JWT |
 | `GET` | `/api/auth/profile` | Get the authenticated user's profile |
+| `GET` | `/api/cart` | Get the authenticated user's cart item IDs |
+| `PUT` | `/api/cart` | Replace the authenticated user's cart item IDs |
+| `POST` | `/api/wishlist` | Add an item to the authenticated user's wishlist |
 
-The profile route requires an `Authorization: Bearer <token>` header. The
-server chooses the MongoDB database from the `x-frontend-path` header, or from
+Profile and cart routes require an `Authorization: Bearer <token>` header. A
+cart stores one `user_id`, an `item_ids` array, and a parallel `quantities`
+array where each quantity uses the same index as its item ID. The server
+chooses the MongoDB database from the `x-frontend-path` header, or from
 the request `Referer` when that header is absent:
 
 - `/admin` uses the admin database
